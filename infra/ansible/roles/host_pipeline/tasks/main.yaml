@@ -1,0 +1,60 @@
+---
+#Make sure necessary files are loaded on the host
+- name: Create src directory
+  ansible.builtin.file:
+    path: /shared/almalinux/src
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
+- name: Copy src folder
+  ansible.builtin.copy:
+    src: "{{playbook_dir}}/../../src/"
+    dest: /shared/almalinux/src/
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+- name:	Create scripts directory
+  ansible.builtin.file:
+    path: /shared/almalinux/scripts
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+- name: Copy scripts folder
+  ansible.builtin.copy:
+    src: "{{playbook_dir}}/../../scripts/"
+    dest: /shared/almalinux/scripts/
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+- name: Create data directory
+  ansible.builtin.file:
+    path: /shared/almalinux/data
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"          
+- name: Copy experiment_ids file
+  ansible.builtin.copy:
+    src: "{{playbook_dir}}/../../data/experiment_ids.txt"
+    dest: /shared/almalinux/data/experiment_ids.txt
+    owner: almalinux
+    group: almalinux
+    mode: "0644"            #6-owner:rw, 4-group:r, 4-others:r
+
+
+- name: Remove old misplaced scripts directory
+  file:
+    path: /shared/scripts
+    state: absent
+
+- name: Remove old misplaced src directory
+  file:
+    path: /shared/src
+    state: absent
+
+- name: Remove old misplaced data directory
+  file:
+    path: /shared/data
+    state: absent

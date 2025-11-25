@@ -1,0 +1,39 @@
+#Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+#Ignore diary
+diary.md
+
+#OS junk
+._*
+.DS_Store
+
+# Terraform state + local cache
+**/.terraform/
+**/.terraform.lock.hcl
+**/*.tfstate
+**/*.tfstate.backup
+**/state_backup/
+**/.terraform.tfstate.lock.info
+**/terraform-provider-*
+**/.terraform_backup/
+
+#Logs + results
+logs/
+results/
+data/example_output/
+
+#Pipeline example
+src/pipeline_example/
+
+#Patch folder
+patch_tmp/
+
+#Compressed docs
+docs/*.tar.gz
+
+#OS/editor junk
+Thumbs.db
+

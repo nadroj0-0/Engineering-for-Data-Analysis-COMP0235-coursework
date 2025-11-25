@@ -1,0 +1,13 @@
+[Unit]
+Description=Celery Worker Service
+After=network.target redis.service
+
+[Service]
+Type=simple
+User=almalinux
+WorkingDirectory=/shared/almalinux/scripts/celery
+ExecStart=/usr/local/bin/celery -A tasks worker --loglevel=INFO
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
