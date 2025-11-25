@@ -8,36 +8,41 @@ def run(command):
     return subprocess.run(command, capture_output=True, encoding='UTF-8')
 
 def generate_inventory():
-    command = "terraform output --json host_ips".split()
-    host_ip_data = json.loads(run(command).stdout)
-
-    command = "terraform output --json worker_ips".split()
-    worker_ip_data = json.loads(run(command).stdout)
-    
-    ip_data = host_ip_data + worker_ip_data
+    host_cmd = "terraform output --json host_ips".split()
+    host_ip_list = json.loads(run(host_cmd).stdout)
+    host = host_ip_list[0]
 
     host_vars = {}
+    host_vars[host] = { "ip": [host] }
+
 
 
     counter = 0
     workers = []
 
-    for a in ip_data:
+    worker_cmd = "terraform output --json worker_ips".split()
+    worker_ips = json.loads(run(worker_cmd).stdout)
+
+    for a in worker_ips:
         name = a
         host_vars[name] = { "ip": [a] }
         workers.append(name)
         counter += 1
 
+
+
     _meta = {}
     _meta["hostvars"] = host_vars
-    _all = { "children": ["workers"] }
+    _all = { "children": ["host", "workers"] }
 
     _workers = { "hosts": workers }
+    _host = { "hosts" : [host] }
 
     _jd = {}
     _jd["_meta"] = _meta
     _jd["all"] = _all
     _jd["workers"] = _workers
+    _jd["host"] = _host
 
     jd = json.dumps(_jd, indent=4)
     return jd
@@ -46,7 +51,7 @@ def generate_inventory():
 if __name__ == "__main__":
 
     ap = argparse.ArgumentParser(
-        description = "Generate an inventory from Terraform.",
+        description = "Generate a cluster inventory from Terraform.",
         prog = __file__
     )
 
@@ -63,5 +68,3 @@ if __name__ == "__main__":
         print(jd)
     else:
         raise ValueError("Expecting either --host $HOSTNAME or --list")
-
-    

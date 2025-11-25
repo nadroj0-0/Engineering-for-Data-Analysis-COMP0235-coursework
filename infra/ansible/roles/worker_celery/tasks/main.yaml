@@ -6,6 +6,13 @@
    # mode: '0755'
     #owner: almalinux
     #group: almalinux
+- name: Deploy celeryconfig.py  #dynamically create celeryconfig (incase ip of host changes)
+  ansible.builtin.template:
+    src: celeryconfig.py.j2
+    dest: /shared/almalinux/scripts/celery/celeryconfig.py
+    owner: almalinux
+    group: almalinux
+    mode: "0644"
 - name: Deploy Celery worker daemon systemd unit
   ansible.builtin.template:
     src: celery-daemon.service.j2
@@ -20,5 +27,5 @@
 - name: Start celery worker daemon service
   ansible.builtin.service:
     name: celery-daemon
-    state: started
+    state: restarted
 
