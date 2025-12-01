@@ -1,6 +1,7 @@
 import sys
 from subprocess import Popen, PIPE
 from Bio import SeqIO
+import shutil
 
 """
 usage: python pipeline_script.py INPUT.fasta  
@@ -51,7 +52,7 @@ def run_s4pred(input_file, out_file):
     """
     Runs the s4pred secondary structure predictor to produce the horiz file
     """
-    cmd = ['/usr/bin/python3', '/home/dbuchan/Code/s4pred/run_model.py',
+    cmd = ['python3', '/home/dbuchan/Code/s4pred/run_model.py',
            '-t', 'horiz', '-T', '1', input_file]
     print(f'STEP 1: RUNNING S4PRED: {" ".join(cmd)}')
     p = Popen(cmd, stdin=PIPE,stdout=PIPE, stderr=PIPE)
@@ -81,6 +82,7 @@ if __name__ == "__main__":
     a3m_file = "tmp.a3m"
     hhr_file = "tmp.hhr"
     for k, v in sequences.items():
+        print(f'Now analysing input: {k}')
         with open(tmp_file, "w") as fh_out:
             fh_out.write(f">{k}\n")
             fh_out.write(f"{v}\n")
@@ -88,3 +90,4 @@ if __name__ == "__main__":
         read_horiz(tmp_file, horiz_file, a3m_file)
         run_hhsearch(a3m_file)
         run_parser(hhr_file)
+        shutil.move("hhr_parse.out", f'{k}_parse.out')
