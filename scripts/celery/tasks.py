@@ -4,6 +4,10 @@ from celery import Celery
 app = Celery('tasks')
 app.config_from_object('celeryconfig')
 
+import scripts.celery.pipeline_tasks
+import scripts.celery.results_parser_tasks
+import scripts.celery.select_ids_tasks
+
 @app.task
 def add(x, y):
     return x + y
