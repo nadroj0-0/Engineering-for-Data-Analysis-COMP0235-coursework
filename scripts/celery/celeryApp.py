@@ -1,0 +1,6 @@
+  GNU nano 5.6.1                                tasks.py
+from celery import Celery
+
+#app = Celery('tasks', broker = 'redis://localhost:6379/0', backend='redis://localhost:6379')
+app = Celery('tasks')
+app.config_from_object('celeryconfig')

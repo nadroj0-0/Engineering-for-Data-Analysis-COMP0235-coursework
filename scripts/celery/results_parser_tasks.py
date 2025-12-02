@@ -1,7 +1,7 @@
 from Bio import SearchIO
 import numpy as np
 from scipy.stats import gmean
-from tasks import app
+from celeryApp import app
 
 @app.task
 def run_results_parser_task(hhr_file, hhr_parser_output_file):

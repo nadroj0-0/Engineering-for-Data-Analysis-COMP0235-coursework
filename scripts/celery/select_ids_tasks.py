@@ -1,11 +1,13 @@
 import sys
 import random
 from Bio import SeqIO
+from celeryApp import app
 
 """
 usage: python select_ids.py INPUT.fasta 2000
 """
 
+@app.task
 def read_input(file):
     """
     Function reads a fasta formatted file of protein sequences

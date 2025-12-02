@@ -2,7 +2,7 @@ import sys
 from subprocess import Popen, PIPE
 from Bio import SeqIO
 import shutil
-from tasks import app
+from celeryApp import app
 
 """
 usage: python pipeline_script.py INPUT.fasta  
