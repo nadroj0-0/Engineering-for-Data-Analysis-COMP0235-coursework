@@ -61,6 +61,10 @@
     force: yes
     update: yes
     accept_hostkey: yes
+- name: Remove old src directory
+  ansible.builtin.file:
+    path: /shared/almalinux/src/
+    state: absent
 - name: Create src directory
   ansible.builtin.file:
     path: /shared/almalinux/src
@@ -76,6 +80,10 @@
     group: almalinux
     mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
     remote_src: yes
+- name: Remove old scripts directory
+  ansible.builtin.file:
+    path: /shared/almalinux/scripts/
+    state: absent
 - name:	Create scripts directory
   ansible.builtin.file:
     path: /shared/almalinux/scripts
@@ -91,6 +99,10 @@
     group: almalinux
     mode: "0755"
     remote_src:	yes
+- name: Remove old data directory
+  ansible.builtin.file:
+    path: /shared/almalinux/data/
+    state: absent
 - name: Create data directory
   ansible.builtin.file:
     path: /shared/almalinux/data
