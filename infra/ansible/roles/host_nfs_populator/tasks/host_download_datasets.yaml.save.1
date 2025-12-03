@@ -44,13 +44,22 @@
   ansible.builtin.file:
     path: /tmp/uniprot_dataset
     state: absent
+  when: not uniprotDatasetFlag.stat.exists
 
 #Download pdb70 protein structure sequence dataset for HHSearch 
-- name: Check if pdb70 dataset already exists (flag)     #some we dont try to download again if already on filesystem
+#- name: Check if pdb70 dataset already exists     #some we dont try to download again if already on filesystem
+#  ansible.builtin.stat:
+#    path: /shared/almalinux/dataset/pdb70
+#  register: pdb70DatasetFlag
+- name: Check if pdb70 ffdata dataset file alreadly exists     #some we dont try to download again if already >
   ansible.builtin.stat:
-    path: /shared/almalinux/dataset/pdb70/.extractionFlag
-  register: pdb70DatasetFlag
-- name: Create temporary pdb70 dataset directory  #prevent putting corrupt files if download goes wrong
+    path: /shared/almalinux/dataset/pdb70/pdb70_a3m.ffdata
+  register: ffdata
+#- name: Check if pdb70 dataset already exists     #some we dont try to download again if already >
+#  ansible.builtin.stat:
+#    path: /shared/almalinux/dataset/pdb70
+#  register: pdb70DatasetFlag
+- name: Create temporary pdb70 dataset directory  #faster and prevent putting corrupt files if download goes wrong
   ansible.builtin.file:
     path: /shared/almalinux/dataset/tmp_pdb70_dataset
     state: directory
@@ -75,15 +84,8 @@
     dest: /shared/almalinux/dataset/pdb70/
     remote_src: yes
   when: not pdb70DatasetFlag.stat.exists
-- name: Create pdb70 extraction check flag
-  ansible.builtin.file:
-    path: /shared/almalinux/dataset/pdb70/.extractionFlag
-    state: touch
-    owner: almalinux
-    group: almalinux
-    mode: "0644"
-  when: not pdb70DatasetFlag.stat.exists
 - name: Delete temporary pdb70 dataset directory
   ansible.builtin.file:
     path: /shared/almalinux/dataset/tmp_pdb70_dataset
     state: absent
+  when: not pdb70DatasetFlag.stat.exists

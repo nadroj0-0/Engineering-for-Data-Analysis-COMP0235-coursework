@@ -31,3 +31,6 @@
 - name: Install Scipy for pipeline import
   ansible.builtin.pip:
     name: "scipy"
+- name: Install Torch for pipeline import
+  ansible.builtin.pip:
+    name: "torch"

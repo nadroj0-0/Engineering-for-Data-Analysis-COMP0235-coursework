@@ -1,2 +1,44 @@
 ---
 #Install s4pred for the pipeline and put inside nfs
+- name: Check if s4pred already installed (flag)     #some we dont try to download again if already on filesystem
+  ansible.builtin.stat:
+    path: /shared/almalinux/tools/s4pred/.installFlag
+  register: s4predFlag
+- name: Create tools directory
+  ansible.builtin.file:
+    path: /shared/almalinux/tools
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+- name: Clone s4pred repo
+  ansible.builtin.git:
+    repo: "https://github.com/psipred/s4pred.git"
+    dest: /shared/almalinux/tools/s4pred
+    clone: yes
+    force: yes
+  when: not s4predFlag.stat.exists
+- name: Download s4pred weights
+  ansible.builtin.get_url:
+    url: http://bioinfadmin.cs.ucl.ac.uk/downloads/s4pred/weights.tar.gz
+    dest: /shared/almalinux/tools/s4pred/weights.tar.gz
+  when: not s4predFlag.stat.exists
+- name: Extract s4pred weights
+  ansible.builtin.unarchive:
+    src: /shared/almalinux/tools/s4pred/weights.tar.gz
+    dest: /shared/almalinux/tools/s4pred/
+    remote_src: yes
+  when: not s4predFlag.stat.exists
+- name: Remove weights tar.gz
+  ansible.builtin.file:
+    state: absent
+    path: /shared/almalinux/tools/s4pred/weights.tar.gz
+  when: not s4predFlag.stat.exists
+- name: Create s4pred install check flag
+  ansible.builtin.file:
+    path: /shared/almalinux/tools/s4pred/.installFlag
+    state: touch
+    owner: almalinux
+    group: almalinux
+    mode: "0644"
+  when: not s4predFlag.stat.exists
