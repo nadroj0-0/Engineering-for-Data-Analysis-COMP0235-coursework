@@ -7,6 +7,7 @@
     gittoken: "glpat-ugp89EP1RrgmeXk1_pOecW86MQp1OngH.01.0w0os6v1x"
     gitrepourl: "https://{{gituser}}:{{gittoken}}@gitlab.ds4eng.condenser.arc.ucl.ac.uk/ucabjsy/coursework-comp0235-2025.git"
   roles:
-    - host_storage
-    - host_pipeline
-    - host_redis
+    - host_configure_nfs
+#    - host_pipeline
+    - host_nfs_populator
+    - host_configure_redis

@@ -3,7 +3,6 @@
   hosts: workers
   become: true
   roles:
-    - worker_python
-    - worker_pipeline
-    - worker_storage
-    - worker_celery  
+    - worker_python_dependencies
+    - worker_configure_nfs
+    - worker_configure_celery  
