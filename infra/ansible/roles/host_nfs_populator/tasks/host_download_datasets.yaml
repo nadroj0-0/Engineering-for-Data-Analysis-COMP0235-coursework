@@ -60,6 +60,7 @@
   ansible.builtin.get_url:
     url: "https://wwwuser.gwdg.de/~compbiol/data/hhsuite/databases/hhsuite_dbs/pdb70_from_mmcif_latest.tar.gz"
     dest: /shared/almalinux/dataset/tmp_pdb70_dataset/pdb70_dataset.tar.gz
+    tmp_dest: /shared/almalinux/dataset/tmp_pdb70_dataset       #forces tmp files to be downladed on shared rather than small root disk
   when: not pdb70DatasetFlag.stat.exists
 - name: Create pdb70 dataset directory
   ansible.builtin.file:
