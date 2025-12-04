@@ -62,13 +62,13 @@
     owner: almalinux
     group: almalinux
     mode: "0755"
-- name:	Copy experiment_ids file
+- name:	Copy data folder
   ansible.builtin.copy:
-    src: /tmp/coursework/data/experiment_ids.txt
-    dest: /shared/almalinux/data/experiment_ids.txt
+    src: /tmp/coursework/data/
+    dest: /shared/almalinux/data/
     owner: almalinux
     group: almalinux
-    mode: "0644"          #6-owner:rw, 4-group:r, 4-others:r
+    mode: "0755"          #6-owner:rw, 4-group:r, 4-others:r
     remote_src:	yes
 - name: Delete git repoistory download fdoler
   ansible.builtin.file:
