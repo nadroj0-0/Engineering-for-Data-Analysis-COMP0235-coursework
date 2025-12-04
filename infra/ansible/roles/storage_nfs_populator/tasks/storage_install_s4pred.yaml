@@ -27,6 +27,7 @@
   ansible.builtin.unarchive:
     src: /shared/almalinux/tools/s4pred/weights.tar.gz
     dest: /shared/almalinux/tools/s4pred/
+    remote_src: yes
   when: not s4predFlag.stat.exists
 - name: Remove weights tar.gz
   ansible.builtin.file:

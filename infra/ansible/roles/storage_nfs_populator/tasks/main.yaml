@@ -1,6 +1,6 @@
 ---
 #Populates the nfs on the host with all the necessary components for the pipeline
-- import_tasks: host_clone_git.yaml
-- import_tasks: host_download_datasets.yaml
-- import_tasks: host_install_s4pred.yaml
-- import_tasks: host_install_hhsuite.yaml
+- import_tasks: storage_clone_git.yaml
+#- import_tasks: storage_download_datasets.yaml
+- import_tasks: storage_install_s4pred.yaml
+- import_tasks: storage_install_hhsuite.yaml

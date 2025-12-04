@@ -72,6 +72,7 @@
   ansible.builtin.unarchive:
     src: /shared/almalinux/dataset/tmp_pdb70_dataset/pdb70_dataset.tar.gz
     dest: /shared/almalinux/dataset/pdb70/
+    remote_src: yes
   when: not pdb70DatasetFlag.stat.exists
 - name: Create pdb70 extraction check flag
   ansible.builtin.file:
