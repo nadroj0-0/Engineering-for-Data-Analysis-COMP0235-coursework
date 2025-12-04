@@ -1,6 +1,6 @@
 [Unit]
 Description=Celery Worker Service
-After=network.target redis.service
+After=network-online.target redis.service remote-fs.target
 
 [Service]
 Type=simple

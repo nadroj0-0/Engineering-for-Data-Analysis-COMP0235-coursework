@@ -1,0 +1,6 @@
+---
+- name: NFS Client configuration
+  hosts: all:!storage
+  become: true
+  roles:
+    - client_configure_nfs

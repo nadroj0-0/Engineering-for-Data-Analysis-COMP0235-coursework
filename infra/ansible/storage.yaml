@@ -1,0 +1,11 @@
+---
+- name: Storage configuration
+  hosts: storage
+  become: true
+  vars:
+    gituser: "ansible"
+    gittoken: "glpat-ugp89EP1RrgmeXk1_pOecW86MQp1OngH.01.0w0os6v1x"
+    gitrepourl: "https://{{gituser}}:{{gittoken}}@gitlab.ds4eng.condenser.arc.ucl.ac.uk/ucabjsy/coursework-comp0235-2025.git"
+  roles:
+    - storage_configure_nfs
+    - storage_nfs_populator

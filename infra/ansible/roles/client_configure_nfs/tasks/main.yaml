@@ -9,7 +9,7 @@
     boot: true
     state: mounted
     fstype: nfs
-    src: "{{groups['host'][0]}}:/shared"
+    src: "{{groups['storage'][0]}}:/shared"
     path: /shared
     opts: defaults,_netdev
 - name: Create home directory sym-link

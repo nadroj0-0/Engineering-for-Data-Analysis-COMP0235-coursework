@@ -22,13 +22,11 @@
   ansible.builtin.get_url:
     url: http://bioinfadmin.cs.ucl.ac.uk/downloads/s4pred/weights.tar.gz
     dest: /shared/almalinux/tools/s4pred/weights.tar.gz
-    tmp_dest: /shared/almalinux/tools/s4pred       #Makes sure i dont fill up tmp in the small host
   when: not s4predFlag.stat.exists
 - name: Extract s4pred weights
   ansible.builtin.unarchive:
     src: /shared/almalinux/tools/s4pred/weights.tar.gz
     dest: /shared/almalinux/tools/s4pred/
-    remote_src: yes
   when: not s4predFlag.stat.exists
 - name: Remove weights tar.gz
   ansible.builtin.file:

@@ -1,4 +1,6 @@
 ---
 - import_playbook: all.yaml
+- import_playbook: storage.yaml
+- import_playbook: nfs_clients.yaml
 - import_playbook: host.yaml
 - import_playbook: workers.yaml
