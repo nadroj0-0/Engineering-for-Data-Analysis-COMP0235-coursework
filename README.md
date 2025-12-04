@@ -1,18 +1,18 @@
 COMP0235 – Distributed Protein Analysis Pipeline
 
 UCL Computer Science — Distributed Systems Coursework
-Last updated: 02 Dec 2025
+Last updated: 04 Dec 2025
 
 This project implements a fully automated distributed protein-processing pipeline. Terraform provisions the Harvester VMs, Ansible configures the environment, Redis acts as the message broker, and Celery executes distributed tasks across five worker machines. All code, task files, helper scripts, and datasets are stored on a shared NFS directory so every worker runs in an identical environment.
 
 Project Structure
 
-ansible/ Ansible configuration (all.yaml, host.yaml, workers.yaml, roles/)
-build_cluster/ Terraform VM provisioning and dynamic inventory generation
-shared/ (NFS) Code, Celery tasks, helper scripts, datasets, experiment IDs
-scripts/ Celery tasks plus helperScripts containing non-Celery utilities
-pipeline/ Distributed pipeline controller (now integrated into tasks.py)
-logs/ Worker and pipeline runtime logs
+ansible/ — Ansible configuration (full.yaml, storage.yaml, nfs_clients.yaml, host.yaml, workers.yaml, roles/)
+build_cluster/ — Terraform VM provisioning and dynamic inventory generation
+shared/ (NFS) — Code, Celery tasks, helper scripts, datasets, experiment IDs
+scripts/ — Celery task package plus helperScripts/
+pipeline/ — Distributed pipeline controller (now integrated into tasks.py)
+logs/ — Worker and pipeline runtime logs
 
 System Overview
 
@@ -21,136 +21,137 @@ The entire cluster can be built and configured using:
 terraform apply
 ansible-playbook full.yaml
 
+
 Workflow:
 
-Terraform creates the host and worker virtual machines.
+Terraform creates the host and five worker VMs.
 
-generate_inventory.py reads Terraform outputs and generates a dynamic Ansible inventory.
+generate_inventory.py reads Terraform outputs and builds the dynamic Ansible inventory.
 
-Ansible configures all machines, mounts the NFS share, installs required software, deploys Celery, and downloads all required datasets.
+Ansible configures all machines, sets up NFS, installs system dependencies, deploys Celery, and populates the shared directory.
 
 Celery workers start under systemd and automatically load task definitions from the shared NFS directory.
 
-This creates a fully reproducible, self-contained distributed system.
+The result is a fully reproducible, uniform distributed processing environment.
 
-Ansible Configuration
-GitLab Integration
+Updated NFS Architecture (Dec 2025)
 
-The host clones the coursework Git repository using variables defined inside host.yaml:
+The original design exported /shared from the host VM.
+This was changed because the host VM has only a 10 GB disk, which is too small for:
 
-gitrepourl
-gituser
-gittoken
+HHsuite build artifacts
 
-HTTPS-based cloning avoids distributing SSH keys and ensures reproducible pulls from GitLab.
+s4pred weights
+
+pdb70 database
+
+UniProt proteome
+
+GitLab code clone
+
+The NFS server is now worker-1, which has a 150 GB disk and also functions as a normal Celery worker.
+
+New layout:
+
+storage node → worker-1 (exports /shared)
+
+nfs clients → host + workers 2–5 (mount /shared)
+
+workers → all 5 workers (including the storage node)
+
+This ensures all machines access the same code and datasets, while giving the NFS server enough space for the full pipeline.
 
 Shared NFS Directory
 
-The host exports:
+worker-1 exports:
 
 /shared/almalinux
 
-Workers mount this directory so all machines share the same:
+
+All other machines mount this via:
+
+<worker-1-ip>:/shared
+
+
+The shared directory contains:
 
 scripts/
-celery/ (Celery tasks)
-helperScripts/ (non-Celery utilities: results_parser.py, select_ids.py)
+ celery/ (Celery tasks)
+ helperScripts/ (results_parser.py, select_ids.py)
 src/
 data/
 dataset/uniprot/
 dataset/pdb70/
+tools/ (HHsuite, s4pred)
 
-This guarantees that every Celery worker uses the same codebase and datasets.
+Every worker runs the pipeline using these shared files, guaranteeing consistency.
 
 Role Reorganisation (Dec 2025)
 
-The Ansible configuration has been fully refactored for clarity:
+NFS roles were updated for the new layout:
 
-host_storage → host_configure_nfs
-host_redis → host_configure_redis
-worker_storage → worker_configure_nfs
-worker_celery → worker_configure_celery
-worker_python → worker_python_dependencies
+storage_configure_nfs – configures NFS server on worker-1
 
-Deprecated or unused roles (seconddisk, cnc, old host_pipeline) have been moved to roles/archive/.
+storage_nfs_populator – clones GitLab repo, installs tools, populates datasets
 
-NFS Population Pipeline
+client_configure_nfs – mounts /shared on host + workers 2–5
 
-A new high-level role, host_nfs_populator, handles population of the shared directory:
+Celery and Python roles remain unchanged, but Celery's systemd unit now includes:
 
-host_clone_git
-host_download_datasets
-host_install_s4pred
-host_install_hhsuite
+After=network-online.target remote-fs.target redis.service
 
-Only the first two are currently implemented.
 
-Code Synchronisation
+so Celery only starts after NFS is mounted and Redis is reachable.
 
-Before copying the fresh GitLab clone into /shared/almalinux/, the host removes the old:
+Dataset Layout
 
-src/
-scripts/
-data/
-
-This prevents stale files staying in the shared directory.
-A future improvement will use ansible.posix.synchronize(delete=yes) for fully mirrored updates.
-
-Dataset Download and Layout
-
-Datasets are now placed into named subdirectories:
+Datasets are placed into named subdirectories:
 
 dataset/uniprot/uniprot_dataset.fasta.gz
-dataset/pdb70/pdb70_dataset.tar.gz (plus extracted files)
+dataset/pdb70/  (full extracted database)
 
-The playbook:
 
-checks whether the dataset exists
+Playbook behaviour:
+
+checks for existing files
 
 downloads only if missing
 
 uses temporary directories
 
-extracts pdb70 automatically
+extracts automatically
 
-deletes all temporary files afterward
+cleans up temporary files
 
-This prevents unnecessary downloads and avoids corrupted partial files.
+idempotent across re-runs
 
 Dynamic Celery Configuration
 
-Celery configuration (celeryconfig.py) is generated by a Jinja2 template which sets:
+Celery config uses a Jinja2 template that injects the current Redis IP:
 
-redis://{{groups["host"][0]}}:6379/0
+redis://{{ groups["host"][0] }}:6379/0
 
-so Celery always targets the correct Redis host even if Terraform generates new IPs.
 
-A systemd service manages the workers and automatically restarts them when configuration changes.
+This ensures the workers always point at the correct broker even after Terraform rebuilds.
 
-Current Status (as of 02 Dec 2025)
+Systemd runs Celery directly from /shared/almalinux/scripts/celery.
 
-Terraform cluster builds successfully.
+Current Status (as of 04 Dec 2025)
 
-Dynamic inventory generation is stable.
+Terraform cluster builds cleanly with consistent VM provisioning.
 
-Ansible roles have been fully reorganised for clarity.
+Worker-1 successfully exports /shared over NFS.
 
-host_nfs_populator handles Git syncing and dataset management.
+Host and workers 2–5 mount the share correctly.
 
-NFS layout is consistent and idempotent across all machines.
+All Celery workers start under systemd across five nodes.
 
-UniProt and pdb70 datasets are downloaded and extracted automatically.
+All machines load the exact same task list from the shared folder.
 
-Celery workers run under systemd and load tasks from the shared folder.
+s4pred and HHsuite fully installed on the storage node.
 
-All pipeline stages from pipeline_script.py have been rewritten as Celery tasks in tasks.py.
+GitLab cloning and file population fully automated.
 
-helperScripts contains non-Celery tools (results_parser.py, select_ids.py).
+UniProt and pdb70 datasets integrated into the shared layout.
 
-Shared NFS folder updates cleanly on every Ansible run.
-
-Cluster-wide checks confirm identical task lists on all workers.
-
-Summary
-
-The cluster is now cleanly structured, fully automated, and nearly ready for a complete end-to-end pipeline test. Terraform builds the machines, Ansible configures everything including GitLab cloning and dataset management, and Celery distributes protein-processing tasks reliably across all workers using Redis for coordination.
+Cluster-wide inspection confirms identical environment across all workers.

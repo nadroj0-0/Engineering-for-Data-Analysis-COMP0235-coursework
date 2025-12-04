@@ -1,0 +1,10 @@
+---
+- name: Install build tools for HHsuite
+  ansible.builtin.dnf:
+    name:
+      - cmake
+      - gcc
+      - gcc-c++
+      - make
+      - zlib-devel
+    state: present
