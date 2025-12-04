@@ -29,20 +29,23 @@ def generate_inventory():
         workers.append(name)
         counter += 1
 
+    storage = worker_ips[0]     #Worker 1 = Storage node
 
 
     _meta = {}
     _meta["hostvars"] = host_vars
-    _all = { "children": ["host", "workers"] }
+    _all = { "children": ["host", "workers", "storage"] }
 
     _workers = { "hosts": workers }
     _host = { "hosts" : [host] }
+    _storage = { "hosts": [storage] }
 
     _jd = {}
     _jd["_meta"] = _meta
     _jd["all"] = _all
     _jd["workers"] = _workers
     _jd["host"] = _host
+    _jd["storage"] = _storage
 
     jd = json.dumps(_jd, indent=4)
     return jd
