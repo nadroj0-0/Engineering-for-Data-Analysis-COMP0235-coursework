@@ -38,6 +38,7 @@
     owner: almalinux
     group: almalinux
     mode: "0644"          #6-owner:rw, 4-group:r, 4-others:r
+    remote_src: yes
   when: not uniprotDatasetFlag.stat.exists
 - name: Delete temporary uniprot dataset directory
   ansible.builtin.file:
