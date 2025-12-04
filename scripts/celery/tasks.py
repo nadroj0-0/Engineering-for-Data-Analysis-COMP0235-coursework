@@ -10,6 +10,7 @@ import sys
 from subprocess import Popen, PIPE
 from Bio import SeqIO
 import shutil
+import os
 
 ########### Toy tasks
 @app.task
@@ -60,36 +61,78 @@ approx 5min per analysis
 """
 
 @app.task
-def run_parser_task(hhr_file):
+def make_seq_dir_task(run_dir, seq_id):
+    """
+    Create a run directory and a sequence directory so organising the files during the pipeline
+    """
+
+    seq_dir = os.path.join(run_dir, seq_id)
+    os.makedirs(seq_dir, exist_ok=True)
+    tmp_fas_path = os.path.join(seq_dir, "tmp.fas")
+    tmp_horiz_path = os.path.join(seq_dir, "tmp.horiz")
+    tmp_a3m_path = os.path.join(seq_dir, "tmp.a3m")
+    tmp_hhr_path = os.path.join(seq_dir, "tmp.hhr")
+    results_parsed_path =os.path.join(seq_dir, f"{seq_id}_parsed.out")
+    seq_paths = {"seq_id": seq_id, "seq_dir": seq_dir, "tmp_fas": tmp_fas_path, "tmp_horiz": tmp_horiz_path, "tmp_a3m": tmp_a3m_path, "tmp_hhr": tmp_hhr_path, "parsed_results": results_parsed_path}
+    return seq_paths
+
+
+@app.task
+def write_fasta_task(seq_paths, sequence):
+    """
+    Write the fasta sequence inot tmp.fas in the specific seq folder
+    """
+    fas_file = seq_paths['tmp_fas']
+    seq_id = seq_paths['seq_id']
+    with open(fas_file, 'w') as fh_out:
+        fh_out.write(f">{seq_id}\n{sequence}\n")
+    return seq_paths
+
+
+@app.task
+#def run_parser_task(hhr_file):
+def run_parser_task(seq_paths):
     """
     Run the results_parser.py over the hhr file to produce the output summary
     """
+    hhr_file = seq_paths['tmp_hhr']
+    out_file = seq_paths['parsed_results']
 #    cmd = ['python', './results_parser.py', hhr_file]
     cmd	= ['python', '/shared/almalinux/scripts/helperScripts/results_parser.py', hhr_file]
     #path to results_parser.py file
     print(f'STEP 4: RUNNING PARSER: {" ".join(cmd)}')
     p = Popen(cmd, stdin=PIPE,stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
-    return out.decode("utf-8")
+    with open(out_file, 'w') as fh_out:
+        fh_out.write(out.decode('utf-8'))
+    return seq_paths
+#    return out.decode("utf-8")
 
 @app.task
-def run_hhsearch_task(a3m_file):
+#def run_hhsearch_task(a3m_file):
+def run_hhsearch_task(seq_paths):
     """
     Run HHSearch to produce the hhr file
     """
-    cmd = ['/home/dbuchan/Applications/hh-suite-3.3.0/build/bin/hhsearch',
+    a3m_file = seq_paths['tmp_a3m']
+    hhr_file = seq_paths['tmp_hhr']
+    cmd = ['/shared/almalinux/tools/hhsuite/build/bin/hhsearch',
            '-i', a3m_file, '-cpu', '1', '-d',
-           '/home/dbuchan/Data/hhdb/pdb70/pdb70']
+           '/shared/almalinux/dataset/pdb70', '-o', hhr_file]
     print(f'STEP 3: RUNNING HHSEARCH: {" ".join(cmd)}')
     p = Popen(cmd, stdin=PIPE,stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
-    return ""
+    return seq_paths
 
 @app.task
-def read_horiz_task(tmp_file, horiz_file, a3m_file):
+#def read_horiz_task(tmp_file, horiz_file, a3m_file):
+def read_horiz_task(seq_paths):
     """
     Parse horiz file and concatenate the information to a new tmp a3m file
     """
+    tmp_file = seq_paths['tmp_fas']
+    horiz_file = seq_paths['tmp_horiz']
+    a3m_file = seq_paths['tmp_a3m']
     pred = ''
     conf = ''
     print("STEP 2: REWRITING INPUT FILE TO A3M")
@@ -104,21 +147,26 @@ def read_horiz_task(tmp_file, horiz_file, a3m_file):
     with open(a3m_file, "w") as fh_out:
         fh_out.write(f">ss_pred\n{pred}\n>ss_conf\n{conf}\n")
         fh_out.write(contents)
-    return a3m_file
+    #return a3m_file
+    return seq_paths
 
 @app.task
-def run_s4pred_task(input_file, out_file):
+#def run_s4pred_task(input_file, out_file):
+def run_s4pred_task(seq_paths):
     """
     Runs the s4pred secondary structure predictor to produce the horiz file
     """
-    cmd = ['python3', '/home/dbuchan/Code/s4pred/run_model.py',
+    input_file = seq_paths['tmp_fas']
+    out_file = seq_paths['tmp_horiz']
+    cmd = ['python3', '/shared/almalinux/tools/s4pred/run_model.py',
            '-t', 'horiz', '-T', '1', input_file]
     print(f'STEP 1: RUNNING S4PRED: {" ".join(cmd)}')
     p = Popen(cmd, stdin=PIPE,stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
     with open(out_file, "w") as fh_out:
         fh_out.write(out.decode("utf-8"))
-    return out_file
+    #return out_file
+    return seq_paths
 
 @app.task
 def read_input_task(file):
