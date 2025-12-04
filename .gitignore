@@ -23,10 +23,10 @@ diary.md
 #Logs + results
 logs/
 results/
-data/example_output/
+#data/example_output/
 
 #Pipeline example
-src/pipeline_example/
+#src/pipeline_example/
 
 #Patch folder
 patch_tmp/
