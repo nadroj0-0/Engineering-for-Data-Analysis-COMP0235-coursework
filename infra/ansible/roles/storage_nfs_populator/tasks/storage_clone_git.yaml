@@ -74,3 +74,10 @@
   ansible.builtin.file:
     path: /tmp/coursework
     state: absent
+- name: Create runs directory
+  file:
+    path: /shared/almalinux/runs
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
