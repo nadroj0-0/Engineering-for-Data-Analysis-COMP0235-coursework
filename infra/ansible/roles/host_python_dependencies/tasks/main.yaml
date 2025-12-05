@@ -2,3 +2,6 @@
 - name: Install Biopython for pipeline import
   ansible.builtin.pip:
     name: "biopython"
+- name: Install Celery[redis]
+  ansible.builtin.pip:
+    name: "celery[redis]"
