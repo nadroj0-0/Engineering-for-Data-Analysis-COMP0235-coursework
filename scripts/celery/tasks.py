@@ -98,7 +98,7 @@ def run_parser_task(seq_paths):
     hhr_file = seq_paths['tmp_hhr']
     out_file = seq_paths['parsed_results']
 #    cmd = ['python', './results_parser.py', hhr_file]
-    cmd	= ['python', '/shared/almalinux/scripts/helperScripts/results_parser.py', hhr_file]
+    cmd	= ['python3', '/shared/almalinux/scripts/helperScripts/results_parser.py', hhr_file]
     #path to results_parser.py file
     print(f'STEP 4: RUNNING PARSER: {" ".join(cmd)}')
     p = Popen(cmd, stdin=PIPE,stdout=PIPE, stderr=PIPE)
