@@ -116,7 +116,7 @@ def run_hhsearch_task(seq_paths):
     """
     a3m_file = seq_paths['tmp_a3m']
     hhr_file = seq_paths['tmp_hhr']
-    cmd = ['/shared/almalinux/tools/hhsuite/build/src/bin/hhsearch',
+    cmd = ['/shared/almalinux/tools/hhsuite/build/src/hhsearch',
            '-i', a3m_file, '-cpu', '1', '-d',
            '/shared/almalinux/dataset/pdb70', '-o', hhr_file]
     print(f'STEP 3: RUNNING HHSEARCH: {" ".join(cmd)}')
