@@ -7,12 +7,12 @@ from celery import chain
 from datetime import datetime
 
 
-from tasks import make_seq_dir_task
-from tasks import write_fasta_task
-from tasks import run_s4pred_task
-from tasks import read_horiz_task
-from tasks import run_hhsearch_task
-from tasks import run_parser_task
+from celery.tasks import make_seq_dir_task
+from celery.tasks import write_fasta_task
+from celery.tasks import run_s4pred_task
+from celery.tasks import read_horiz_task
+from celery.tasks import run_hhsearch_task
+from celery.tasks import run_parser_task
 
 def gen_run_name():
     """Generates a run name from the time"""
