@@ -1,0 +1,4 @@
+---
+- name: Install Biopython for pipeline import
+  ansible.builtin.pip:
+    name: "biopython"

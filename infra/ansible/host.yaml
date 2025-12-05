@@ -10,4 +10,5 @@
 #    - host_configure_nfs
 ##    - host_pipeline
 #    - host_nfs_populator
+    - host_python_dependencies
     - host_configure_redis
