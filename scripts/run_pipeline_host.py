@@ -4,6 +4,7 @@ import sys
 import os
 from Bio import SeqIO
 from celery import chain
+from datetime import datetime
 
 
 from tasks import make_seq_dir_task
@@ -12,6 +13,10 @@ from tasks import run_s4pred_task
 from tasks import read_horiz_task
 from tasks import run_hhsearch_task
 from tasks import run_parser_task
+
+def gen_run_name():
+    """Generates a run name from the time"""
+    return "run_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 def read_input(fasta_path):
     """Reead a fasta file and returns a dictionary {seq_id : sequence}"""
@@ -38,13 +43,17 @@ def submit_chain(run_name, seq_id, sequence):
 
 
 if __name__ == "__main__":
+    run_folder = "/shared/almalinux/runs"
     fasta_path = sys.argv[1]
-    run_name = sys.argv[2]
-    os.makedirs(run_name, exist_ok=True)
+    if len(sys.argv) > 2:
+        run_name = sys.argv[2]
+    else: run_name = gen_run_name()
+    run_dir = os.path.join(run_folder, run_name)
+    os.makedirs(run_dir, exist_ok=True)
     sequences = read_input(fasta_path)
     for k, v in sequences.items():
         print(f'Now analysing input: {k}')
-        submit_chain(run_name, k, v)
+        submit_chain(run_dir, k, v)
     print("All sequences sent for analysis")
 
 
