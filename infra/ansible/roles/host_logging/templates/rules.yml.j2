@@ -1,0 +1,17 @@
+---
+#Rules to send customised metrics to prometheus about the CPU, Memory and Disk usage of workers
+groups:
+  - name: node_aggregates
+    rules:
+      # Average CPU usage per node (percentage)
+      - record: node:cpu_usage:avg
+        expr: |
+          100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[1m])))
+      # Average memory usage per node (percentage)
+      - record: node:memory_usage:avg
+        expr: |
+          100 * (1 - (node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes))
+      # Disk usage growth rate (bytes per second)
+      - record: node:disk_usage_growth
+        expr: |
+          rate(node_filesystem_size_bytes[10m])

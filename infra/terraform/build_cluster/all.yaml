@@ -2,13 +2,8 @@
 - name: Setup for all nodes
   hosts: all
   become: true
-  tasks:
-    - name: Print playbook dir
-      debug:
-        msg: "{{ playbook_dir }}"
   roles:
   - common
   - reboot
   - openmpi
   - python312
-  - all_node_exporter

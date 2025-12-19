@@ -34,6 +34,15 @@ resource "harvester_virtualmachine" "host" {
   name                 = "${var.username}-host-${random_id.secret.hex}"
   namespace            = local.namespace
   restart_after_update = true
+  
+  labels = {
+    "condenser.ingress.prometheus/hostname" = "prometheus_ucabjsy"
+    "condenser.ingress.prometheus/port"     = "9090"
+    "condenser.ingress.nodeexporter/hostname" = "nodeexporter_ucabjsy"
+    "condenser.ingress.nodeexporter/port"  = "9100"
+    "condenser.ingress.grafana/hostname"    = "grafana_ucabjsy"
+    "condenser.ingress.grafana/port"        = "3000"
+  }
 
   description = "Base VM"
 

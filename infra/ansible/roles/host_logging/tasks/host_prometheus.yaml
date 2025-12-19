@@ -1,0 +1,52 @@
+---
+#Set up prometheus on the host
+- name: Install golang
+  ansible.builtin.dnf:
+    name: golang
+    state: latest
+- name: Install epel
+  ansible.builtin.dnf:
+    name: epel-release
+    state: latest
+- name: Install prometheus package
+  ansible.builtin.dnf:
+    name: golang-github-prometheus
+    state: latest
+- name: Make sure prometheus directory exists
+  ansible.builtin.file:
+    path: /etc/prometheus
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+- name: Deploy prometheus config file
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: root
+    group: root
+    mode: "0644"
+- name: Make sure prometheus rules directory exists
+  ansible.builtin.file:
+    path: /etc/prometheus/rules
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+- name: Deploy Prometheus recording rules
+  ansible.builtin.template:
+    src: rules.yml.j2
+    dest: /etc/prometheus/rules/node_rules.yml
+    owner: root
+    group: root
+    mode: "0644"
+- name: Restart Prometheus
+  ansible.builtin.service:
+    name: prometheus
+    state: restarted
+- name: Start prometheus
+  ansible.builtin.service:
+    name: prometheus
+    state: started
+    enabled: true
+    daemon_reload: true

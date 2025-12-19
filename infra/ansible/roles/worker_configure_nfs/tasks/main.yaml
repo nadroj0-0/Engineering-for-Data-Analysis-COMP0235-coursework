@@ -1,0 +1,19 @@
+---
+# tasks for storage mounting on workers
+- name: Make directory to export
+  ansible.builtin.file:
+    path: /shared
+    state: directory
+- name: NFS mount
+  ansible.posix.mount:
+    boot: true
+    state: mounted
+    fstype: nfs
+    src: "{{groups['host'][0]}}:/shared"
+    path: /shared
+    opts: defaults,_netdev
+- name: Create home directory sym-link
+  ansible.builtin.file:
+    src: /shared/almalinux
+    dest: /home/almalinux/shared
+    state: link

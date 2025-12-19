@@ -1,0 +1,20 @@
+---
+- name: Install Redis
+  ansible.builtin.dnf:
+    name: redis
+    state: present
+- name: Edit redis config bind
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: '^bind '
+    line: 'bind 0.0.0.0 ::'  #will listen on all ipv4 and ipv6 addresses
+- name:	Edit redis config protected mode
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: '^protected-mode '
+    line: protected-mode no  #accepts connections over the network (not just locally)
+- name: Enable and start redis
+  ansible.builtin.service:
+    name: redis
+    enabled: yes
+    state: started

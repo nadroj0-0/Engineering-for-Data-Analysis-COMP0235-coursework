@@ -1,0 +1,34 @@
+---
+#Setup Node Exporter on all machines
+- name: Install golang
+  ansible.builtin.dnf:
+    name: golang
+    state: latest
+- name: Install epel
+  ansible.builtin.dnf:
+    name: epel-release
+    state: latest
+- name: Install node exporter package
+  ansible.builtin.dnf:
+    name: golang-github-prometheus-node-exporter
+    state: latest
+- name: Create custom metrics directory
+  ansible.builtin.file:
+    path: /home/almalinux/custom_metrics
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+- name: move service file
+  ansible.builtin.copy:
+    src: node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: "0644"
+- name: Start node exporter
+  ansible.builtin.service:
+    name: node_exporter
+    state: started
+    enabled: true
+    daemon_reload: true

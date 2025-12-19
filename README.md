@@ -1,85 +1,90 @@
 COMP0235 – Distributed Protein Analysis Pipeline
 
 UCL Computer Science — Distributed Systems Coursework
-Last updated: 05 Dec 2025
+Last updated: 18 Dec 2025
 
-This project implements a fully automated distributed protein-processing pipeline. Terraform provisions the Harvester VMs, Ansible configures the environment, Redis acts as the message broker, and Celery executes distributed tasks across five worker machines. All code, task files, helper scripts, and datasets are stored in a shared NFS directory so every worker runs in an identical environment.
+This project implements a fully automated, distributed protein-analysis pipeline. Terraform provisions a multi-node cluster on Harvester, Ansible configures the environment, Redis acts as the message broker, and Celery executes a task-based pipeline across five worker machines.
+
+All pipeline code, helper scripts, tools, and datasets are stored on a shared NFS filesystem so every worker executes in an identical environment. The system supports parallel execution, fault isolation, and end-to-end reproducibility.
 
 Project Structure
-ansible/           – Full configuration of host + workers (roles, playbooks)
-build_cluster/     – Terraform VM provisioning + dynamic inventory generation
+ansible/               – Full configuration of host + workers (roles, playbooks)
+terraform/build_cluster/ – Terraform VM provisioning + dynamic inventory
 shared/
-   └── almalinux/
-        scripts/
-            celery/        – Celery tasks + run_pipeline_host.py (pipeline entrypoint)
-            helperScripts/ – results_parser.py, select_ids.py
-        src/               – Reference pipeline_example/ and original scripts
-        dataset/           – pdb70 database, UniProt subsets
-        tools/             – HHsuite, s4pred
-        runs/              – Auto-generated pipeline output directories
-logs/              – Worker and pipeline runtime logs
+└── almalinux/
+    ├── scripts/
+    │   ├── celery/        – Celery tasks + run_pipeline_host.py
+    │   └── helperScripts/ – results_parser.py, metrics.py, utilities
+    ├── src/               – Reference pipeline_example/ and original scripts
+    ├── dataset/           – pdb70 database, UniProt subsets
+    ├── tools/             – HHsuite, s4pred
+    └── runs/              – Auto-generated pipeline output directories
+logs/                  – Runtime logs (where applicable)
 
 System Overview
 Cluster Build Process
 
-The entire distributed environment is built using:
+The entire environment is built using:
 
 terraform apply
 ansible-playbook full.yaml
 
 
-Terraform provisions the host VM and five worker VMs.
+Terraform
 
-generate_inventory.py collects outputs and builds the dynamic Ansible inventory.
+Provisions 1 host VM and 5 worker VMs.
 
-Ansible:
+Generates outputs used to create a dynamic Ansible inventory.
 
-configures all nodes
+Ansible
 
-installs Python, Redis bindings, BioPython
+Configures all machines with base dependencies.
 
-configures NFS (worker-1 as server, host + workers 2–5 as clients)
+Sets up NFS (worker-1 as server, others as clients).
 
-installs HHsuite and s4pred
+Installs Redis, Python dependencies, HHsuite, and s4pred.
 
-deploys Celery
+Deploys Celery workers via systemd.
 
-populates the shared directory
+Installs monitoring components (Node Exporter, Prometheus).
 
-Celery workers start via systemd and load their task definitions directly from the shared /shared/almalinux/scripts/celery directory.
+Celery workers load their task definitions directly from the shared directory:
 
-The result is a reproducible, uniform distributed compute environment.
+/shared/almalinux/scripts/celery
+
+
+This guarantees identical code and tools on every worker.
 
 Updated NFS Architecture (Dec 2025)
 
-Originally, the host exported /shared, but its 10 GB disk was too small for toolchains and datasets.
-The NFS server is now worker-1, which has a 150 GB disk.
+The host VM has a 10 GB disk, which is insufficient for large datasets and toolchains.
+The NFS server was therefore migrated to worker-1, which has a 150 GB disk.
 
 Final layout
 
-NFS server → worker-1 exports /shared/almalinux
+NFS server: worker-1 exports /shared/almalinux
 
-NFS clients → host + workers 2–5 mount /shared
+NFS clients: host + workers 2–5
 
-Celery workers → all five workers (including worker-1)
+Celery workers: all five workers (including worker-1)
 
-This guarantees:
+This provides:
 
-all machines share the same tools, databases, scripts
+Sufficient storage for pdb70, UniProt, HHsuite, and s4pred
 
-sufficient disk space for pdb70, HHsuite builds, UniProt datasets
+A single shared execution environment
 
-consistent execution across the cluster
+Consistent results across all workers
 
-Pipeline Architecture (Dec 2025)
+Pipeline Architecture
 Celery Task Pipeline
 
-The original monolithic script was rewritten into isolated Celery tasks stored in:
+The original monolithic script was rewritten as isolated Celery tasks located in:
 
 /shared/almalinux/scripts/celery/tasks.py
 
 
-Each sequence is processed via a chain of tasks:
+Each protein sequence is processed via a Celery chain:
 
 make_seq_dir_task
 → write_fasta_task
@@ -88,9 +93,12 @@ make_seq_dir_task
 → run_hhsearch_task
 → run_parser_task
 
+
+Each task performs one clearly defined step and passes its output forward.
+
 Path Dictionary (seq_paths)
 
-All tasks pass around a single dictionary containing:
+All tasks pass around a single dictionary containing sequence-specific paths:
 
 seq_id
 seq_dir
@@ -101,90 +109,172 @@ tmp.hhr
 parsed_results
 
 
-This mirrors the behaviour of the professor’s original script while enabling safe distributed execution.
+This mirrors the behaviour of the original reference pipeline while allowing safe parallel execution without filename collisions.
 
 Filesystem Layout Per Sequence
 
-For each input sequence, Celery creates:
+For each input sequence, the pipeline creates:
 
 runs/<run_name>/<sequence_id>/
-    tmp.fas
-    tmp.horiz
-    tmp.a3m
-    tmp.hhr
-    <sequence_id>_parsed.out
+├── tmp.fas
+├── tmp.horiz
+├── tmp.a3m
+├── tmp.hhr
+└── <sequence_id>_parsed.out
 
 
-This separates outputs cleanly and avoids filename conflicts when thousands of sequences run in parallel.
+Each sequence is fully isolated, enabling thousands of sequences to run concurrently.
 
-Host-Side Orchestration (run_pipeline_host.py)
+Host-Side Orchestration
 
-The pipeline is now invoked via:
+The pipeline is launched from the host using:
 
 python3 run_pipeline_host.py <fasta_input> [optional_run_name]
 
 
 run_pipeline_host.py:
 
-resides in /shared/almalinux/scripts/celery/
+Resides in /shared/almalinux/scripts/celery/
 
-reads the FASTA input
+Reads a FASTA input file
 
-generates a run directory (auto-timestamped if no name is supplied)
+Generates a run directory (timestamped if not supplied)
 
-dispatches one Celery chain per sequence
+Submits one Celery chain per sequence
 
-Example:
+Example
 
 python3 /shared/almalinux/scripts/celery/run_pipeline_host.py \
     /shared/almalinux/src/pipeline_example/test.fa
 
 
-If a run name is not supplied, a timestamped name is generated automatically:
+If no run name is provided, one is generated automatically:
 
 run_2025-12-05_04-21-08/
 
+Monitoring & Observability (Dec 2025)
+
+Basic observability has been added to track system and pipeline behaviour.
+
+Node Exporter (All Machines)
+
+Installed on host and all workers
+
+Exposes CPU, memory, disk, and custom application metrics
+
+Uses the textfile collector at:
+
+/home/almalinux/custom_metrics
+
+Application Metrics (metrics.py)
+
+A lightweight helper module (metrics.py) exposes pipeline-level metrics:
+
+Task execution counters
+
+Task failure counters
+
+Tasks currently in progress
+
+Pipeline running state
+
+Timestamps for last task and pipeline completion
+
+Metrics are written safely to .prom files and labelled using the machine hostname.
+
+These metrics are intended to be called from:
+
+tasks.py
+
+run_pipeline_host.py
+
+Prometheus (Host)
+
+Installed and configured on the host
+
+Scrapes:
+
+Prometheus itself
+
+Node Exporter on all machines
+
+Includes recording rules for:
+
+CPU utilisation
+
+Memory utilisation
+
+Disk growth rates
+
+Ingress labels are configured via Terraform to expose Prometheus and Grafana UIs using unique hostnames.
+
 Role Reorganisation
 
-The following roles manage NFS and dataset/tool deployment:
+Key Ansible roles:
 
-storage_configure_nfs — sets up NFS server on worker-1
+storage_configure_nfs — NFS server setup (worker-1)
 
-storage_nfs_populator — installs HHsuite and s4pred, clones GitLab repo, populates datasets
+storage_nfs_populator — installs tools, datasets, and code
 
-client_configure_nfs — mounts /shared on host and workers 2–5
+client_configure_nfs — mounts /shared on clients
 
-Celery’s systemd unit includes:
+worker_configure_celery — Celery worker configuration
 
-After=network-online.target remote-fs.target redis.service
+all_node_exporter — Node Exporter on all machines
+
+host_logging — Prometheus (and Grafana readiness)
+
+Celery’s systemd unit explicitly waits for:
+
+network-online.target
+remote-fs.target
+redis.service
 
 
-ensuring Celery starts only after NFS and Redis are available.
+ensuring correct startup ordering.
 
 Dataset Layout
 dataset/
-    uniprot/uniprot_dataset.fasta.gz
-    pdb70/  (full database)
+├── uniprot/
+│   └── uniprot_dataset.fasta.gz
+└── pdb70/
+    └── (full HHsuite database)
 
 
-Datasets are downloaded, extracted, and validated idempotently.
+All datasets are downloaded, extracted, and validated idempotently via Ansible.
 
-Current Status (as of 05 Dec 2025)
+Current Status (05 Dec 2025)
 
-Terraform builds a consistent 6-node cluster.
+Terraform builds a consistent 6-node cluster
 
-Worker-1 exports /shared via NFS with sufficient storage.
+Worker-1 exports /shared with sufficient storage
 
-Host + workers 2–5 mount the shared directory correctly.
+All clients mount /shared correctly
 
-All Celery workers run under systemd and correctly load tasks.
+Celery workers run under systemd and load tasks correctly
 
-HHsuite and s4pred installed and verified.
+HHsuite and s4pred installed and verified
 
-End-to-end pipeline runs successfully on the provided test sequence.
+End-to-end pipeline validated against reference output
 
-Automatic run directory generation fully operational.
+Parallel execution tested across multiple workers
 
-Task parallelisation validated: multiple runs executed simultaneously across workers.
+Monitoring infrastructure in place and ready for Grafana dashboards
 
-The distributed pipeline is now functional, modular, and ready for multi-sequence and large-scale runs.
+Next Steps
+
+Instrument Celery tasks and host orchestration with metrics.py
+
+Validate Prometheus scraping once Rancher is stable
+
+Build Grafana dashboards:
+
+Per-worker
+
+Storage node
+
+Pipeline-level overview
+
+Add structured .log file logging
+
+Integrate a PostgreSQL results database for experiment tracking
