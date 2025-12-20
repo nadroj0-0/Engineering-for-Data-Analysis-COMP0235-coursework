@@ -1,15 +1,15 @@
 COMP0235 – Distributed Protein Analysis Pipeline
 
 UCL Computer Science — Distributed Systems Coursework
-Last updated: 18 Dec 2025
+Last updated: 19 Dec 2025
 
 This project implements a fully automated, distributed protein-analysis pipeline. Terraform provisions a multi-node cluster on Harvester, Ansible configures the environment, Redis acts as the message broker, and Celery executes a task-based pipeline across five worker machines.
 
 All pipeline code, helper scripts, tools, and datasets are stored on a shared NFS filesystem so every worker executes in an identical environment. The system supports parallel execution, fault isolation, and end-to-end reproducibility.
 
 Project Structure
-ansible/               – Full configuration of host + workers (roles, playbooks)
-terraform/build_cluster/ – Terraform VM provisioning + dynamic inventory
+ansible/                  – Full configuration of host + workers (roles, playbooks)
+terraform/build_cluster/  – Terraform VM provisioning + dynamic inventory
 shared/
 └── almalinux/
     ├── scripts/
@@ -19,7 +19,7 @@ shared/
     ├── dataset/           – pdb70 database, UniProt subsets
     ├── tools/             – HHsuite, s4pred
     └── runs/              – Auto-generated pipeline output directories
-logs/                  – Runtime logs (where applicable)
+logs/                     – Runtime logs (where applicable)
 
 System Overview
 Cluster Build Process
@@ -29,24 +29,23 @@ The entire environment is built using:
 terraform apply
 ansible-playbook full.yaml
 
-
 Terraform
 
-Provisions 1 host VM and 5 worker VMs.
+Provisions 1 host VM and 5 worker VMs
 
-Generates outputs used to create a dynamic Ansible inventory.
+Generates outputs used to create a dynamic Ansible inventory
 
 Ansible
 
-Configures all machines with base dependencies.
+Configures all machines with base dependencies
 
-Sets up NFS (worker-1 as server, others as clients).
+Sets up NFS (worker-1 as server, others as clients)
 
-Installs Redis, Python dependencies, HHsuite, and s4pred.
+Installs Redis, Python dependencies, HHsuite, and s4pred
 
-Deploys Celery workers via systemd.
+Deploys Celery workers via systemd
 
-Installs monitoring components (Node Exporter, Prometheus).
+Installs monitoring components (Node Exporter, Prometheus)
 
 Celery workers load their task definitions directly from the shared directory:
 
@@ -101,13 +100,18 @@ Path Dictionary (seq_paths)
 All tasks pass around a single dictionary containing sequence-specific paths:
 
 seq_id
-seq_dir
-tmp.fas
-tmp.horiz
-tmp.a3m
-tmp.hhr
-parsed_results
 
+seq_dir
+
+tmp.fas
+
+tmp.horiz
+
+tmp.a3m
+
+tmp.hhr
+
+parsed_results
 
 This mirrors the behaviour of the original reference pipeline while allowing safe parallel execution without filename collisions.
 
@@ -140,10 +144,9 @@ Reads a FASTA input file
 
 Generates a run directory (timestamped if not supplied)
 
-Submits one Celery chain per sequence
+Submits one asynchronous Celery chain per sequence
 
 Example
-
 python3 /shared/almalinux/scripts/celery/run_pipeline_host.py \
     /shared/almalinux/src/pipeline_example/test.fa
 
@@ -180,9 +183,10 @@ Pipeline running state
 
 Timestamps for last task and pipeline completion
 
-Metrics are written safely to .prom files and labelled using the machine hostname.
+Metrics are written safely to .prom files and labelled automatically using the machine hostname.
+Metrics are actively emitted by all Celery pipeline tasks at runtime and reflect live system state rather than historical logs.
 
-These metrics are intended to be called from:
+These metrics are called from:
 
 tasks.py
 
@@ -227,9 +231,10 @@ host_logging — Prometheus (and Grafana readiness)
 Celery’s systemd unit explicitly waits for:
 
 network-online.target
-remote-fs.target
-redis.service
 
+remote-fs.target
+
+redis.service
 
 ensuring correct startup ordering.
 
@@ -243,7 +248,7 @@ dataset/
 
 All datasets are downloaded, extracted, and validated idempotently via Ansible.
 
-Current Status (05 Dec 2025)
+Current Status (Dec 2025)
 
 Terraform builds a consistent 6-node cluster
 
@@ -259,11 +264,11 @@ End-to-end pipeline validated against reference output
 
 Parallel execution tested across multiple workers
 
-Monitoring infrastructure in place and ready for Grafana dashboards
+Application-level metrics fully implemented and emitting
+
+Monitoring infrastructure in place and ready for dashboards
 
 Next Steps
-
-Instrument Celery tasks and host orchestration with metrics.py
 
 Validate Prometheus scraping once Rancher is stable
 
@@ -275,6 +280,6 @@ Storage node
 
 Pipeline-level overview
 
-Add structured .log file logging
+Add structured, rotated .log file logging (worker, storage, host)
 
 Integrate a PostgreSQL results database for experiment tracking

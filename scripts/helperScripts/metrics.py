@@ -81,7 +81,7 @@ def task_failed(task_name):
         {"task": task_name, "worker": HOSTNAME},
     )
     set_state("tasks_in_progress", {"worker": HOSTNAME}, 0)
-
+    set_timestamp("last_task_execution_time", {"worker": HOSTNAME})
 
 def pipeline_started():
     set_state("pipeline_running", {}, 1)

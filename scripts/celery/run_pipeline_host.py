@@ -14,6 +14,9 @@ from tasks import read_horiz_task
 from tasks import run_hhsearch_task
 from tasks import run_parser_task
 
+from helperScripts.metrics import pipeline_started, pipeline_finished
+
+
 def gen_run_name():
     """Generates a run name from the time"""
     return "run_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -50,11 +53,13 @@ if __name__ == "__main__":
     else: run_name = gen_run_name()
     run_dir = os.path.join(run_folder, run_name)
     os.makedirs(run_dir, exist_ok=True)
+    pipeline_started()
     sequences = read_input(fasta_path)
     for k, v in sequences.items():
         print(f'Now analysing input: {k}')
         submit_chain(run_dir, k, v)
     print("All sequences sent for analysis")
+    pipeline_finished()
 
 
 #if __name__ == "__main__":
