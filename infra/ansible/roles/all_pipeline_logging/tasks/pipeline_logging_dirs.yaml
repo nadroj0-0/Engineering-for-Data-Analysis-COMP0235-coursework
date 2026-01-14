@@ -1,0 +1,43 @@
+---
+- name: Create pipeline log directory
+  become: true #created by root
+  ansible.builtin.file:
+    path: /var/log/protien_analysis_pipeline
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+
+- name: Create logs directory in home
+  ansible.builtin.file:
+    path: /home/almalinux/logs
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+
+- name: Create symlink to worker in logs directory
+  ansible.builtin.file:
+    src: /var/log/protien_analysis_pipeline
+    dest: /home/almalinux/logs/worker
+    state: link
+    owner: almalinux
+    group: almalinux
+  when: "'workers' in group_names"
+
+- name: Create symlink to host in logs directory
+  ansible.builtin.file:
+    src: /var/log/protien_analysis_pipeline
+    dest: /home/almalinux/logs/host
+    state: link
+    owner: almalinux
+    group: almalinux
+  when: "'host' in group_names"
+ 
+- name: Create symlink to storage logs in logs directory
+  ansible.builtin.file:
+    src: /shared/almalinux/storage_logs
+    dest: /home/almalinux/logs/storage
+    state: link
+    owner: almalinux
+    group: almalinux

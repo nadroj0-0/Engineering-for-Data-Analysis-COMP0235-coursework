@@ -5,33 +5,38 @@
     path: /tmp/coursework
     state: directory
     mode: "0755"
-- name: Temporary clone entire coursework git repository
-  ansible.builtin.git:
-    repo: "{{gitrepourl}}"
-    dest: /tmp/coursework
-    version: master
-    force: yes
-    update: yes
-    accept_hostkey: yes
-- name: Remove old src directory
-  ansible.builtin.file:
-    path: /shared/almalinux/src/
-    state: absent
-- name: Create src directory
-  ansible.builtin.file:
-    path: /shared/almalinux/src
-    state: directory
-    owner: almalinux
-    group: almalinux
-    mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
-- name:	Copy src folder
-  ansible.builtin.copy:
-    src: /tmp/coursework/src/
-    dest: /shared/almalinux/src/
-    owner: almalinux
-    group: almalinux
-    mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
-    remote_src: yes
+# Temporary fix whilst gitlab is down - MUST DELETE BEFORE SUBMISSION
+- name: Copy coursework repo from hub to storage node
+  ansible.builtin.synchronize:
+    src: /home/almalinux/coursework/
+    dest: /tmp/coursework/
+#- name: Temporary clone entire coursework git repository
+#  ansible.builtin.git:
+#    repo: "{{gitrepourl}}"
+#    dest: /tmp/coursework
+#    version: master
+#    force: yes
+#    update: yes
+#    accept_hostkey: yes
+#- name: Remove old src directory
+#  ansible.builtin.file:
+#    path: /shared/almalinux/src/
+#    state: absent
+#- name: Create src directory
+#  ansible.builtin.file:
+#    path: /shared/almalinux/src
+#    state: directory
+#    owner: almalinux
+#    group: almalinux
+#    mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
+#- name:	Copy src folder
+#  ansible.builtin.copy:
+#    src: /tmp/coursework/src/
+#    dest: /shared/almalinux/src/
+#    owner: almalinux
+#    group: almalinux
+#    mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
+#    remote_src: yes
 - name: Remove old scripts directory
   ansible.builtin.file:
     path: /shared/almalinux/scripts/
@@ -51,25 +56,25 @@
     group: almalinux
     mode: "0755"
     remote_src:	yes
-- name: Remove old data directory
-  ansible.builtin.file:
-    path: /shared/almalinux/data/
-    state: absent
-- name: Create data directory
-  ansible.builtin.file:
-    path: /shared/almalinux/data
-    state: directory
-    owner: almalinux
-    group: almalinux
-    mode: "0755"
-- name:	Copy data folder
-  ansible.builtin.copy:
-    src: /tmp/coursework/data/
-    dest: /shared/almalinux/data/
-    owner: almalinux
-    group: almalinux
-    mode: "0755"          #6-owner:rw, 4-group:r, 4-others:r
-    remote_src:	yes
+#- name: Remove old data directory
+#  ansible.builtin.file:
+#    path: /shared/almalinux/data/
+#    state: absent
+#- name: Create data directory
+#  ansible.builtin.file:
+#    path: /shared/almalinux/data
+#    state: directory
+#    owner: almalinux
+#    group: almalinux
+#    mode: "0755"
+#- name:	Copy data folder
+#  ansible.builtin.copy:
+#    src: /tmp/coursework/data/
+#    dest: /shared/almalinux/data/
+#    owner: almalinux
+#    group: almalinux
+#    mode: "0755"          #6-owner:rw, 4-group:r, 4-others:r
+#    remote_src:	yes
 - name: Delete git repoistory download fdoler
   ansible.builtin.file:
     path: /tmp/coursework

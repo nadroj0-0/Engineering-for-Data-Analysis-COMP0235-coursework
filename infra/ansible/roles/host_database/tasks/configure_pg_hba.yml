@@ -1,0 +1,15 @@
+---
+- name: Allow password auth for pipeline host user
+  become: true
+  become_user: postgres
+  ansible.builtin.lineinfile:
+    path: /var/lib/pgsql/data/pg_hba.conf
+    insertafter: BOF
+    line: "local   pipeline_db   host   md5"
+    state: present
+
+- name: Reload PostgreSQL configuration
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    cmd: pg_ctl reload -D /var/lib/pgsql/data

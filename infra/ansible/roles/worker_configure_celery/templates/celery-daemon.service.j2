@@ -1,12 +1,15 @@
 [Unit]
 Description=Celery Worker Service
-After=network-online.target redis.service remote-fs.target
+After=network.target redis.service
 
 [Service]
 Type=simple
 User=almalinux
 WorkingDirectory=/shared/almalinux/scripts/celery
-ExecStart=/usr/local/bin/celery -A tasks worker --loglevel=INFO
+ExecStart=/usr/local/bin/celery -A tasks worker \
+  --loglevel=INFO \
+  --concurrency=1 \
+  --logfile=/var/log/protien_analysis_pipeline/celery_%H.log
 Restart=always
 
 [Install]

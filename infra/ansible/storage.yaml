@@ -9,3 +9,4 @@
   roles:
     - storage_configure_nfs
     - storage_nfs_populator
+    - storage_logging

@@ -1,0 +1,61 @@
+---
+#Download uniprot mouse proteome set
+- name: Check if extracted uniprot dataset already exists     #so we dont try to download again if already on filesystem
+  ansible.builtin.stat:
+    path: /srv/uniprot/uniprot_dataset.fasta
+  register: uniprotDatasetFlag
+
+- name: Create temporary uniprot dataset directory  #prevent putting corrupt files if download goes wrong
+  ansible.builtin.file:
+    path: /tmp/uniprot_dataset
+    state: directory
+    mode: "0755"
+  when: not uniprotDatasetFlag.stat.exists
+
+- name: Download uniprot dataset
+  ansible.builtin.get_url:
+    url: "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000000589/UP000000589_10090.fasta.gz"
+    dest: /tmp/uniprot_dataset/uniprot_dataset.fasta.gz
+  when: not uniprotDatasetFlag.stat.exists
+
+- name: Create srv/uniprot dataset directory
+  ansible.builtin.file:
+    path: /srv/uniprot
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0755"
+
+- name: Copy uniprot dataset to srv/uniprot   #copy tmp to acc shared file system
+  ansible.builtin.copy:
+    src: /tmp/uniprot_dataset/uniprot_dataset.fasta.gz
+    dest: /srv/uniprot/uniprot_dataset.fasta.gz
+    owner: postgres
+    group: postgres
+    mode: "0644"          #6-owner:rw, 4-group:r, 4-others:r
+    remote_src: yes
+  when: not uniprotDatasetFlag.stat.exists
+
+- name: Extract uniprot dataset
+  ansible.builtin.command:
+    cmd: gunzip -kf /srv/uniprot/uniprot_dataset.fasta.gz
+  when: not uniprotDatasetFlag.stat.exists
+
+- name: Delete temporary uniprot dataset directory
+  ansible.builtin.file:
+    path: /tmp/uniprot_dataset
+    state: absent
+
+- name: Create dataset directory
+  ansible.builtin.file:
+    path: /home/almalinux/dataset
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+
+- name: Create symlink to uniprot dataset
+  ansible.builtin.file:
+    src: /srv/uniprot
+    dest: /home/almalinux/dataset/uniprot
+    state: link

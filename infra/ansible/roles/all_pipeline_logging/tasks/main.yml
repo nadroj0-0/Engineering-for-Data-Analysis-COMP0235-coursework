@@ -1,0 +1,3 @@
+---
+- import_tasks: pipeline_logging_dirs.yaml
+- import_tasks: logrotate.yaml

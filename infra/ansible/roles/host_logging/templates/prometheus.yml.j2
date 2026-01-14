@@ -20,5 +20,5 @@ scrape_configs:
     static_configs:
       - targets:
 {% for host in groups['all'] %}
-          - "{{ hostvars[host].ansible_host }}:9100"
+          - "{{ host }}:9100"
 {% endfor %}

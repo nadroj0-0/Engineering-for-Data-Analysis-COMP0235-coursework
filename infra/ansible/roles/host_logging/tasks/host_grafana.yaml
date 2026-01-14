@@ -1,2 +1,17 @@
 ---
 #Setup Grafana on host
+- name: Install Grafana
+  ansible.builtin.dnf:
+    name: grafana
+    state: present
+- name: Allow Grafana to connect to Prometheus via SELinux
+  ansible.posix.seboolean:
+    name: grafana_can_tcp_connect_prometheus_port
+    state: true
+    persistent: true
+- name: Enable and start Grafana
+  ansible.builtin.service:
+    name: grafana-server
+    state: started
+    enabled: true
+    daemon_reload: true

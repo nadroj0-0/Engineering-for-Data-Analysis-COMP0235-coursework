@@ -1,0 +1,10 @@
+/var/log/protien_analysis_pipeline/*.log {
+    weekly
+    rotate 3
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    create 0640 almalinux almalinux
+}

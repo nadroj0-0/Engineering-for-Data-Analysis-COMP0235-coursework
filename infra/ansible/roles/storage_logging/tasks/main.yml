@@ -1,0 +1,17 @@
+---
+- name: Create storage logs directory exists on NFS
+  become: true
+  ansible.builtin.file:
+    path: /shared/almalinux/storage_logs
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+- name: Install storage logrotate config
+  become: true
+  ansible.builtin.template:
+    src: storage_pipeline.logrotate.j2
+    dest: /etc/logrotate.d/storage_pipeline
+    owner: root
+    group: root
+    mode: "0644"

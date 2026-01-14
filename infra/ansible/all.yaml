@@ -12,3 +12,4 @@
   - openmpi
   - python312
   - all_node_exporter
+  - all_pipeline_logging

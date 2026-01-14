@@ -212,6 +212,13 @@ def run_hhsearch_task(self, seq_paths):
     log_info(task_name, seq_id, "Task started")
     success = False
     try:
+        # -------- fault injection (temporary) --------
+        if self.request.retries < 3:
+            raise RuntimeError(
+                f"INTENTIONAL FAILURE for retry testing (attempt {self.request.retries + 1})"
+            )
+        # ---------------------------------------------
+
         a3m_file = seq_paths['tmp_a3m']
         hhr_file = seq_paths['tmp_hhr']
         cmd = ['/shared/almalinux/tools/hhsuite/build/src/hhsearch',

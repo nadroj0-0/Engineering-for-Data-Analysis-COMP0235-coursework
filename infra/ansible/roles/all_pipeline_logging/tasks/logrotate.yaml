@@ -1,0 +1,8 @@
+- name: Install pipeline logrotate config
+  become: true
+  ansible.builtin.template:
+    src: protien_pipeline.logrotate.j2
+    dest: /etc/logrotate.d/protien_pipeline
+    owner: root
+    group: root
+    mode: "0644"

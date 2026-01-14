@@ -1,0 +1,42 @@
+---
+# Celery operational setup (PID files + easy access symlinks)
+
+- name: Make sure ops directory exists in home
+  ansible.builtin.file:
+    path: /home/almalinux/ops
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+
+- name: Make sure pid directory exists in ops
+  ansible.builtin.file:
+    path: /home/almalinux/ops/pid
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+
+- name: Make sure celery PID directory exists
+  become: true # create as root
+  ansible.builtin.file:
+    path: /var/run/protien_analysis
+    state: directory
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+
+- name: Wait for Celery PID file to appear
+  become: true
+  ansible.builtin.wait_for:
+    path: /var/run/protien_analysis/celery.pid
+    state: present
+    timeout: 60
+
+- name: Create symlink to celery PID file
+  ansible.builtin.file:
+    src: /var/run/protien_analysis/celery.pid
+    dest: /home/almalinux/ops/pid/celery.pid
+    state: link
+    owner: almalinux
+    group: almalinux

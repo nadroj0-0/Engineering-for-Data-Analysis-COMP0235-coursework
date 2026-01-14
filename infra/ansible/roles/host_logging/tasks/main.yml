@@ -1,0 +1,4 @@
+---
+- import_tasks: host_prometheus.yaml
+- import_tasks: host_grafana.yaml
+

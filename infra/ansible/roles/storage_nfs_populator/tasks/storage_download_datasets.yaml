@@ -1,49 +1,49 @@
 ---
 #Download necessary datasets for the pipeline and put inside nfs
 #Download uniprot mouse proteome set
-- name: Check if uniprot dataset already exists     #some we dont try to download again if already on filesystem
-  ansible.builtin.stat:
-    path: /shared/almalinux/dataset/uniprot/uniprot_dataset.fasta.gz
-  register: uniprotDatasetFlag
-- name: Create temporary uniprot dataset directory  #prevent putting corrupt files if download goes wrong
-  ansible.builtin.file:
-    path: /tmp/uniprot_dataset
-    state: directory
-    mode: "0755"
-  when: not uniprotDatasetFlag.stat.exists
-- name: Download uniprot dataset
-  ansible.builtin.get_url:
-    url: "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000000589/UP000000589_10090.fasta.gz"
-    dest: /tmp/uniprot_dataset/uniprot_dataset.fasta.gz
-  when: not uniprotDatasetFlag.stat.exists
-- name: Create dataset directory
-  ansible.builtin.file:
-    path: /shared/almalinux/dataset
-    state: directory
-    owner: almalinux
-    group: almalinux
-    mode: "0755"
-- name: Create uniprot dataset directory
-  ansible.builtin.file:
-    path: /shared/almalinux/dataset/uniprot
-    state: directory
-    owner: almalinux
-    group: almalinux
-    mode: "0755"
-  when: not uniprotDatasetFlag.stat.exists
-- name: Copy uniprot dataset to dataset   #copy tmp to acc shared file system
-  ansible.builtin.copy:
-    src: /tmp/uniprot_dataset/uniprot_dataset.fasta.gz
-    dest: /shared/almalinux/dataset/uniprot/uniprot_dataset.fasta.gz
-    owner: almalinux
-    group: almalinux
-    mode: "0644"          #6-owner:rw, 4-group:r, 4-others:r
-    remote_src: yes
-  when: not uniprotDatasetFlag.stat.exists
-- name: Delete temporary uniprot dataset directory
-  ansible.builtin.file:
-    path: /tmp/uniprot_dataset
-    state: absent
+#- name: Check if uniprot dataset already exists     #some we dont try to download again if already on filesystem
+#  ansible.builtin.stat:
+#    path: /shared/almalinux/dataset/uniprot/uniprot_dataset.fasta.gz
+#  register: uniprotDatasetFlag
+#- name: Create temporary uniprot dataset directory  #prevent putting corrupt files if download goes wrong
+#  ansible.builtin.file:
+#    path: /tmp/uniprot_dataset
+#    state: directory
+#    mode: "0755"
+#  when: not uniprotDatasetFlag.stat.exists
+#- name: Download uniprot dataset
+#  ansible.builtin.get_url:
+#    url: "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000000589/UP000000589_10090.fasta.gz"
+#    dest: /tmp/uniprot_dataset/uniprot_dataset.fasta.gz
+#  when: not uniprotDatasetFlag.stat.exists
+#- name: Create dataset directory
+#  ansible.builtin.file:
+#    path: /shared/almalinux/dataset
+#    state: directory
+#    owner: almalinux
+#    group: almalinux
+#    mode: "0755"
+#- name: Create uniprot dataset directory
+#  ansible.builtin.file:
+#    path: /shared/almalinux/dataset/uniprot
+#    state: directory
+#    owner: almalinux
+#    group: almalinux
+#    mode: "0755"
+#  when: not uniprotDatasetFlag.stat.exists
+#- name: Copy uniprot dataset to dataset   #copy tmp to acc shared file system
+#  ansible.builtin.copy:
+#    src: /tmp/uniprot_dataset/uniprot_dataset.fasta.gz
+#    dest: /shared/almalinux/dataset/uniprot/uniprot_dataset.fasta.gz
+#    owner: almalinux
+#    group: almalinux
+#    mode: "0644"          #6-owner:rw, 4-group:r, 4-others:r
+#    remote_src: yes
+#  when: not uniprotDatasetFlag.stat.exists
+#- name: Delete temporary uniprot dataset directory
+#  ansible.builtin.file:
+#    path: /tmp/uniprot_dataset
+#    state: absent
 
 #Download pdb70 protein structure sequence dataset for HHSearch 
 - name: Check if pdb70 dataset already exists (flag)     #some we dont try to download again if already on filesystem
@@ -87,3 +87,8 @@
   ansible.builtin.file:
     path: /shared/almalinux/dataset/tmp_pdb70_dataset
     state: absent
+- name: Make pdb70 database readable by all users
+  ansible.builtin.file:
+    path: /shared/almalinux/dataset/pdb70
+    recurse: yes
+    mode: "a+rX"

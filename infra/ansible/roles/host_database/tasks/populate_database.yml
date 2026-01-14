@@ -1,0 +1,20 @@
+- name: Deploy uniprot database population script to tmp directory
+  ansible.builtin.copy:
+    src: populate_uniprot_database.py
+    dest: /tmp/populate_uniprot_database.py
+    owner: almalinux
+    group: almalinux
+    mode: "0755"
+- name: Run uniprot database population script
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    cmd: python3 /tmp/populate_uniprot_database.py
+  register: populate_output
+- name: Show population summary
+  ansible.builtin.debug:
+    msg: "{{populate_output.stdout}}"
+- name: Remove uniprot population script
+  ansible.builtin.file:
+    path: /tmp/populate_uniprot_database.py
+    state: absent

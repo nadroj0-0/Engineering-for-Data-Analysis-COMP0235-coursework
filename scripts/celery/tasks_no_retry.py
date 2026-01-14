@@ -108,8 +108,8 @@ def make_seq_dir_task(run_dir, seq_id):
         if success == True:
             task_finished(task_name)
 
-@app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
-def write_fasta_task(self, seq_paths, sequence):
+@app.task
+def write_fasta_task(seq_paths, sequence):
     """
     Write the fasta sequence inot tmp.fas in the specific seq folder
     """
@@ -119,38 +119,24 @@ def write_fasta_task(self, seq_paths, sequence):
     log_info(task_name, seq_id, "Task started")
     success = False
     try:
-
-        if not sequence or str(sequence).strip() == "":
-            raise RuntimeError("Sequence is empty or missing")
-
         fas_file = seq_paths['tmp_fas']
         seq_id = seq_paths['seq_id']
         with open(fas_file, 'w') as fh_out:
             fh_out.write(f">{seq_id}\n{sequence}\n")
-
-        if not os.path.exists(fas_file):
-            raise RuntimeError("tmp.fas was not created")
-        if os.path.getsize(fas_file) == 0:
-            raise RuntimeError("tmp.fas is empty after write")
-
         success = True
         log_info(task_name, seq_id, "Task completed successfully")
         return seq_paths
     except Exception as e:
-        attempt = self.request.retries + 1
-        log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
-#        task_failed(task_name)
-        if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+        log_error(task_name, seq_id, f"Task failed: {str(e)}")
+        task_failed(task_name)
         raise
     finally:
         if success == True:
             task_finished(task_name)
 
-
-@app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
+@app.task
 #def run_parser_task(hhr_file):
-def run_parser_task(self, seq_paths):
+def run_parser_task(seq_paths):
     """
     Run the results_parser.py over the hhr file to produce the output summary
     """
@@ -162,10 +148,6 @@ def run_parser_task(self, seq_paths):
     try:
         hhr_file = seq_paths['tmp_hhr']
         out_file = seq_paths['parsed_results']
-
-        if not os.path.exists(hhr_file) or os.path.getsize(hhr_file) == 0:
-            raise RuntimeError("tmp.hhr missing/empty (HHsearch output not ready)")
-
 #        cmd = ['python', './results_parser.py', hhr_file]
         cmd	= ['python3', '/shared/almalinux/scripts/celery/results_parser.py',
                 hhr_file, seq_paths["hhr_parsed"] ]
@@ -188,21 +170,16 @@ def run_parser_task(self, seq_paths):
 #        return out.decode("utf-8")
     except Exception as e:
         log_storage_error(seq_id,f"Failed to write final output {out_file} | {type(e).__name__}: {str(e)}")
-#        log_error(task_name, seq_id, f"Task failed: {str(e)}")
-       	attempt = self.request.retries + 1
-       	log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
-#        task_failed(task_name)
-        if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+        log_error(task_name, seq_id, f"Task failed: {str(e)}")
+        task_failed(task_name)
         raise
     finally:
         if success == True:
             task_finished(task_name)
 
-
-@app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
+@app.task
 #def run_hhsearch_task(a3m_file):
-def run_hhsearch_task(self, seq_paths):
+def run_hhsearch_task(seq_paths):
     """
     Run HHSearch to produce the hhr file
     """
@@ -234,21 +211,16 @@ def run_hhsearch_task(self, seq_paths):
         log_info(task_name, seq_id, "Task completed successfully")
         return seq_paths
     except Exception as e:
-#        log_error(task_name, seq_id, f"Task failed: {str(e)}")
-       	attempt = self.request.retries + 1
-       	log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
-#        task_failed(task_name)
-        if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+        log_error(task_name, seq_id, f"Task failed: {str(e)}")
+        task_failed(task_name)
         raise
     finally:
         if success == True:
             task_finished(task_name)
 
-
-@app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
+@app.task
 #def read_horiz_task(tmp_file, horiz_file, a3m_file):
-def read_horiz_task(self, seq_paths):
+def read_horiz_task(seq_paths):
     """
     Parse horiz file and concatenate the information to a new tmp a3m file
     """
@@ -261,16 +233,6 @@ def read_horiz_task(self, seq_paths):
         tmp_file = seq_paths['tmp_fas']
         horiz_file = seq_paths['tmp_horiz']
         a3m_file = seq_paths['tmp_a3m']
-
-        if not os.path.exists(horiz_file):
-            raise RuntimeError("tmp.horiz missing (S4Pred output not ready)")
-        if os.path.getsize(horiz_file) == 0:
-            raise RuntimeError("tmp.horiz empty (S4Pred output not ready)")
-        if not os.path.exists(tmp_file):
-            raise RuntimeError("tmp.fas missing (FASTA not written yet)")
-        if os.path.getsize(tmp_file) == 0:
-            raise RuntimeError("tmp.fas empty")
-
         pred = ''
         conf = ''
         print("STEP 2: REWRITING INPUT FILE TO A3M")
@@ -285,30 +247,22 @@ def read_horiz_task(self, seq_paths):
         with open(a3m_file, "w") as fh_out:
             fh_out.write(f">ss_pred\n{pred}\n>ss_conf\n{conf}\n")
             fh_out.write(contents)
-
-        if pred == "" or conf == "":
-            raise RuntimeError("tmp.horiz did not contain Pred/Conf lines")
-
         #return a3m_file
         success = True
         log_info(task_name, seq_id, "Task completed successfully")
         return seq_paths
     except Exception as e:
-#        log_error(task_name, seq_id, f"Task failed: {str(e)}")
-       	attempt = self.request.retries + 1
-       	log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
-#        task_failed(task_name)
-        if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+        log_error(task_name, seq_id, f"Task failed: {str(e)}")
+        task_failed(task_name)
         raise
     finally:
         if success == True:
             task_finished(task_name)
 
 
-@app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
+@app.task
 #def run_s4pred_task(input_file, out_file):
-def run_s4pred_task(self, seq_paths):
+def run_s4pred_task(seq_paths):
     """
     Runs the s4pred secondary structure predictor to produce the horiz file
     """
@@ -332,17 +286,12 @@ def run_s4pred_task(self, seq_paths):
         log_info(task_name, seq_id, "Task completed successfully")
         return seq_paths
     except Exception as e:
-#        log_error(task_name, seq_id, f"Task failed: {str(e)}")
-       	attempt = self.request.retries + 1
-       	log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
-#        task_failed(task_name)
-        if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+        log_error(task_name, seq_id, f"Task failed: {str(e)}")
+        task_failed(task_name)
         raise
     finally:
         if success == True:
             task_finished(task_name)
-
 
 
 @app.task

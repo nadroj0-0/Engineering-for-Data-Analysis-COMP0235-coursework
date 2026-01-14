@@ -1,0 +1,11 @@
+---
+- import_tasks: download_uniprot.yml
+- import_tasks: initialise_postgres_database.yml
+- import_tasks: create_pipeline_database.yml
+- import_tasks: create_host_user.yml
+- import_tasks: configure_pg_hba.yml
+- import_tasks: populate_database.yml
+- import_tasks: remove_uniprot_download.yml
+
+
+

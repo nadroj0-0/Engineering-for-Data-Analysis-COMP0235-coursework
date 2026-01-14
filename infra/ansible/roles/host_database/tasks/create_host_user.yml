@@ -1,0 +1,28 @@
+---
+- name: Create pipeline database host user
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: host
+    password: host
+    state: present
+
+- name: Grant connect on pipeline database
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_privs:
+    db: pipeline_db
+    type: database
+    privs: CONNECT
+    roles: host
+
+- name: Grant read access to proteins table
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_privs:
+    db: pipeline_db
+    type: table
+    schema: public
+    objs: proteins
+    privs: SELECT
+    roles: host
