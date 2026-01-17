@@ -77,12 +77,12 @@ approx 5min per analysis
 """
 
 @app.task
-def make_seq_dir_task(run_dir, seq_id):
+def make_seq_dir_task(run_id, run_dir, seq_id):
     """
     Create a run directory and a sequence directory so organising the files during the pipeline
     """
     task_name = "make_seq_dir_task"
-    task_started()
+    task_started(run_id)
     log_info(task_name, seq_id, "Task started")
     success = False
     try:
@@ -95,18 +95,18 @@ def make_seq_dir_task(run_dir, seq_id):
         tmp_hhr_path = os.path.join(seq_dir, "tmp.hhr")
         hhr_parsed_path = os.path.join(seq_dir, "hhr_parse.out")
         results_parsed_path =os.path.join(seq_dir, f"{seq_id}_parsed.out")
-        seq_paths = {"seq_id": seq_id, "seq_dir": seq_dir, "tmp_fas": tmp_fas_path, "tmp_horiz": tmp_horiz_path, "tmp_a3m": tmp_a3m_path, "tmp_hhr": tmp_hhr_path, "hhr_parsed": hhr_parsed_path, "parsed_results": results_parsed_path}
+        seq_paths = {"run_id": run_id, "seq_id": seq_id, "seq_dir": seq_dir, "tmp_fas": tmp_fas_path, "tmp_horiz": tmp_horiz_path, "tmp_a3m": tmp_a3m_path, "tmp_hhr": tmp_hhr_path, "hhr_parsed": hhr_parsed_path, "parsed_results": results_parsed_path}
         success = True
         log_info(task_name, seq_id, "Task completed successfully")
         return seq_paths
     except Exception as e:
         log_storage_error(seq_id,f"Failed to create sequence directory at {seq_dir} | {type(e).__name__}: {e}")
         log_error(task_name, seq_id, f"Task failed: {str(e)}")
-        task_failed(task_name)
+        task_failed(task_name, run_id)
         raise
     finally:
         if success == True:
-            task_finished(task_name)
+            task_finished(task_name, run_id)
 
 @app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
 def write_fasta_task(self, seq_paths, sequence):
@@ -115,7 +115,8 @@ def write_fasta_task(self, seq_paths, sequence):
     """
     task_name = "write_fasta_task"
     seq_id = seq_paths["seq_id"]
-    task_started()
+    run_id = seq_paths["run_id"]
+    task_started(run_id)
     log_info(task_name, seq_id, "Task started")
     success = False
     try:
@@ -141,11 +142,11 @@ def write_fasta_task(self, seq_paths, sequence):
         log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
 #        task_failed(task_name)
         if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+            task_failed(task_name, run_id)
         raise
     finally:
         if success == True:
-            task_finished(task_name)
+            task_finished(task_name, run_id)
 
 
 @app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
@@ -156,7 +157,8 @@ def run_parser_task(self, seq_paths):
     """
     task_name = "run_parser_task"
     seq_id = seq_paths["seq_id"]
-    task_started()
+    run_id = seq_paths["run_id"]
+    task_started(run_id)
     log_info(task_name, seq_id, "Task started")
     success = False
     try:
@@ -193,11 +195,11 @@ def run_parser_task(self, seq_paths):
        	log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
 #        task_failed(task_name)
         if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+            task_failed(task_name, run_id)
         raise
     finally:
         if success == True:
-            task_finished(task_name)
+            task_finished(task_name, run_id)
 
 
 @app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
@@ -208,7 +210,8 @@ def run_hhsearch_task(self, seq_paths):
     """
     task_name = "run_hhsearch_task"
     seq_id = seq_paths["seq_id"]
-    task_started()
+    run_id = seq_paths["run_id"]
+    task_started(run_id)
     log_info(task_name, seq_id, "Task started")
     success = False
     try:
@@ -239,11 +242,11 @@ def run_hhsearch_task(self, seq_paths):
        	log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
 #        task_failed(task_name)
         if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+            task_failed(task_name, run_id)
         raise
     finally:
         if success == True:
-            task_finished(task_name)
+            task_finished(task_name, run_id)
 
 
 @app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
@@ -254,7 +257,8 @@ def read_horiz_task(self, seq_paths):
     """
     task_name = "read_horiz_task"
     seq_id = seq_paths["seq_id"]
-    task_started()
+    run_id = seq_paths["run_id"]
+    task_started(run_id)
     log_info(task_name, seq_id, "Task started")
     success = False
     try:
@@ -299,11 +303,11 @@ def read_horiz_task(self, seq_paths):
        	log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
 #        task_failed(task_name)
         if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+            task_failed(task_name, run_id)
         raise
     finally:
         if success == True:
-            task_finished(task_name)
+            task_finished(task_name, run_id)
 
 
 @app.task(autoretry_for=(Exception,), retry_kwargs={"max_retries": 5, "countdown": 30}, bind=True)
@@ -314,7 +318,8 @@ def run_s4pred_task(self, seq_paths):
     """
     task_name = "run_s4pred_task"
     seq_id = seq_paths["seq_id"]
-    task_started()
+    run_id = seq_paths["run_id"]
+    task_started(run_id)
     log_info(task_name, seq_id, "Task started")
     success = False
     try:
@@ -337,11 +342,11 @@ def run_s4pred_task(self, seq_paths):
        	log_error(task_name, seq_id, f"Task attempt {attempt} failed: {str(e)}")
 #        task_failed(task_name)
         if self.request.retries >= self.max_retries:
-            task_failed(task_name)
+            task_failed(task_name, run_id)
         raise
     finally:
         if success == True:
-            task_finished(task_name)
+            task_finished(task_name, run_id)
 
 
 

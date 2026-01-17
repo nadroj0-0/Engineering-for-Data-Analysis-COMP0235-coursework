@@ -15,7 +15,7 @@ from tasks import read_horiz_task
 from tasks import run_hhsearch_task
 from tasks import run_parser_task
 
-from metrics import pipeline_started, pipeline_finished
+from metrics import pipeline_started, pipeline_finished, pipeline_exp_tasks
 
 
 def gen_run_name():
@@ -51,12 +51,12 @@ def read_input_db_version(conn, experiment_ids_path):
         sequences[seq_id] = str(sequence)
     return sequences
 
-def submit_chain(run_name, seq_id, sequence):
+def submit_chain(run_id, run_dir, seq_id, sequence):
     """
     Build and dispatch the Celery chain for one sequence.
     """
     c = chain(
-        make_seq_dir_task.s(run_name, seq_id),
+        make_seq_dir_task.s(run_id, run_dir, seq_id),
         write_fasta_task.s(sequence),
         run_s4pred_task.s(),
         read_horiz_task.s(),
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     else: run_name = gen_run_name()
     run_dir = os.path.join(run_folder, run_name)
     os.makedirs(run_dir, exist_ok=True)
-    pipeline_started()
+    pipeline_started(run_name)
 
     #experiment_ids = read_experiment_ids(experiment_ids_path)
     conn = psycopg2.connect(
@@ -93,11 +93,13 @@ if __name__ == "__main__":
     #    sequences[seq_id] = str(sequence)
 
     #sequences = read_input(fasta_path)
+    num_seqs = len(sequences)
+    pipeline_exp_tasks(run_name, num_seqs)
     for k, v in sequences.items():
         print(f'Now analysing input: {k}')
-        submit_chain(run_dir, k, v)
+        submit_chain(run_name, run_dir, k, v)
     print("All sequences sent for analysis")
-    pipeline_finished()
+#    pipeline_finished(run_name)
 
 
 #if __name__ == "__main__":
