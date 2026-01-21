@@ -33,6 +33,14 @@
     mode: "0600"
   when: not minio_pass.stat.exists
   no_log: true
+- name: Load MinIO password into variable
+  ansible.builtin.slurp:
+    src: /home/almalinux/miniopass
+  register: minio_pass_file
+  become: true
+- name: Set MinIO password fact
+  ansible.builtin.set_fact:
+    minio_root_password: "{{ minio_pass_file.content | b64decode | trim }}"
 - name: Copy TLS generation stub
   ansible.builtin.copy:
     mode: "0700"
