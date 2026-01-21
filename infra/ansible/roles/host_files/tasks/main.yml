@@ -7,19 +7,19 @@
     mode: "0755"
 
 # Temporary fix whilst gitlab is down - MUST DELETE BEFORE SUBMISSION
-- name: Copy V2coursework repo from hub to storage node
-  ansible.builtin.synchronize:
-    src: /home/almalinux/V2coursework/
-    dest: /tmp/V2coursework/
+#- name: Copy V2coursework repo from hub to storage node
+#  ansible.builtin.synchronize:
+#    src: /home/almalinux/V2coursework/
+#    dest: /tmp/V2coursework/
 
-#- name: Temporary clone entire V2coursework git repository
-#  ansible.builtin.git:
-#    repo: "{{gitrepourl}}"
-#    dest: /tmp/V2coursework
-#    version: master
-#    force: yes
-#    update: yes
-#    accept_hostkey: yes
+- name: Temporary clone entire V2coursework git repository
+  ansible.builtin.git:
+    repo: "{{gitrepourl}}"
+    dest: /tmp/V2coursework
+    version: master
+    force: yes
+    update: yes
+    accept_hostkey: yes
 
 - name: Remove old data directory
   ansible.builtin.file:
