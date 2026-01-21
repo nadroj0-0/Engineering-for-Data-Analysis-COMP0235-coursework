@@ -38,4 +38,4 @@ docs/*.tar.gz
 Thumbs.db
 
 #Ignore .miniopass
-.miniopass
+#.miniopass
