@@ -17,5 +17,6 @@
     - host_python_dependencies
     - host_files
     - host_configure_redis
+    - host_configure_minio
     - host_logging
     - host_database

@@ -47,6 +47,15 @@ resource "harvester_virtualmachine" "host" {
 
   condenser_ingress_nodeexporter_hostname = "nodeexporter-${var.username}"
   condenser_ingress_nodeexporter_port     = 9100
+
+  condenser_ingress_os_hostname = "${var.username}-s3"
+  condenser_ingress_os_port = 9000
+  condenser_ingress_os_protocol = "https"
+#  condenser_ingress_os_nginx_proxy-body-size = "100000m"
+  condenser_ingress_cons_hostname = "${var.username}-cons"
+  condenser_ingress_cons_port = 9001
+  condenser_ingress_cons_protocol = "https"
+#  condenser_ingress_cons_nginx_proxy-body-size = "100000m"
   }
   
   description = "Base VM"

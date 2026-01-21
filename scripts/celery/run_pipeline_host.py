@@ -3,17 +3,12 @@
 import sys
 import os
 from Bio import SeqIO
-from celery import chain
+from celery import chain, chord, signature
 from datetime import datetime
 import psycopg2
 
 
-from tasks import make_seq_dir_task
-from tasks import write_fasta_task
-from tasks import run_s4pred_task
-from tasks import read_horiz_task
-from tasks import run_hhsearch_task
-from tasks import run_parser_task
+from tasks import run_sequence_task, aggregate_results_task
 
 from metrics import pipeline_started, pipeline_finished, pipeline_exp_tasks
 
@@ -51,19 +46,8 @@ def read_input_db_version(conn, experiment_ids_path):
         sequences[seq_id] = str(sequence)
     return sequences
 
-def submit_chain(run_id, run_dir, seq_id, sequence):
-    """
-    Build and dispatch the Celery chain for one sequence.
-    """
-    c = chain(
-        make_seq_dir_task.s(run_id, run_dir, seq_id),
-        write_fasta_task.s(sequence),
-        run_s4pred_task.s(),
-        read_horiz_task.s(),
-        run_hhsearch_task.s(),
-        run_parser_task.s(),
-    )
-    return c.apply_async()
+def submit_sequence(run_id, seq_id, sequence):
+    return run_sequence_task.apply_async(args=(run_id, seq_id, sequence))
 
 
 
@@ -95,9 +79,14 @@ if __name__ == "__main__":
     #sequences = read_input(fasta_path)
     num_seqs = len(sequences)
     pipeline_exp_tasks(run_name, num_seqs)
+    tasks = []
     for k, v in sequences.items():
         print(f'Now analysing input: {k}')
-        submit_chain(run_name, run_dir, k, v)
+        task = run_sequence_task.s(run_name, k, v)
+        tasks.append(task)
+#        submit_sequence(run_name, k, v)
+    if tasks:
+        chord(tasks)(aggregate_results_task.s(run_name))
     print("All sequences sent for analysis")
 #    pipeline_finished(run_name)
 

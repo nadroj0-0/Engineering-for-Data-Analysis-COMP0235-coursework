@@ -12,8 +12,6 @@ usage:
 
 # Where all runs live on shared storage
 RUNS_DIR = "/shared/almalinux/runs"
-# Where final results should be stored on the host
-HOST_RESULTS_DIR = os.path.expanduser("~/results")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -24,8 +22,8 @@ if __name__ == "__main__":
     if not os.path.isdir(run_path):
         print(f"Run directory not found: {run_path}")
         sys.exit(1)
-    # Create output directory on host
-    results_path = os.path.join(HOST_RESULTS_DIR, run_id)
+    # Create output directory inside run directory
+    results_path = os.path.join(run_path, "output")
     os.makedirs(results_path, exist_ok=True)
     # Data we will aggregate
     hits_rows = []
@@ -43,25 +41,36 @@ if __name__ == "__main__":
         with open(parsed_file, "r") as f:
             reader = csv.DictReader(f)
             row = next(reader)
-            # For example_hits_output.csv
+            # For hits_output.csv
             hits_rows.append({"fasta_id": row["query_id"],"best_hit_id": row["best_hit"]})
-            # For example_profile_output.csv
-            all_stds.append(float(row["score_std"]))
-            all_gmeans.append(float(row["score_gmean"]))
+            # For profile_output.csv
+            std_val = float(row["score_std"])
+            gmean_val = float(row["score_gmean"])
+            if not np.isnan(std_val):
+                all_stds.append(std_val)
+            if not np.isnan(gmean_val):
+                all_gmeans.append(gmean_val)
     if len(hits_rows) == 0:
         print("No parsed output files found, nothing to aggregate")
         sys.exit(1)
-    # ---- Write example_hits_output.csv ----
+    print(f"Profile stats computed from {len(all_stds)} / {len(hits_rows)} sequences")
+    if len(all_stds) == 0 or len(all_gmeans) == 0:
+        ave_std = "nan"
+        ave_gmean = "nan"
+    else:
+        ave_std = round(np.mean(all_stds), 2)
+        ave_gmean = round(np.mean(all_gmeans), 2)
+    # Write hits_output.csv
     hits_output_path = os.path.join(results_path,f"{run_id}_hits_output.csv")
     with open(hits_output_path, "w", newline="") as f:
         writer = csv.DictWriter(f,fieldnames=["fasta_id", "best_hit_id"])
         writer.writeheader()
         writer.writerows(hits_rows)
-    # ---- Write example_profile_output.csv ----
+    # Write profile_output.csv
     profile_output_path = os.path.join(results_path,f"{run_id}_profile_output.csv")
     with open(profile_output_path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["ave_std", "ave_gmean"])
-        writer.writerow([round(np.mean(all_stds), 2),round(np.mean(all_gmeans), 2)])
+        writer.writerow([ave_std,ave_gmean])
     print(f"Aggregation finished for run: {run_id}")
     print(f"Results saved to: {results_path}")

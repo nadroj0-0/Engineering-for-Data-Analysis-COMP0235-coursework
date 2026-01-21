@@ -2,13 +2,13 @@
 #Clone all the necessary folders and files from the git repo and put inside nfs
 - name: Create temporary git directory
   ansible.builtin.file:
-    path: /tmp/coursework
+    path: /tmp/V2coursework
     state: directory
     mode: "0755"
-- name: Temporary clone entire coursework git repository
+- name: Temporary clone entire V2coursework git repository
   ansible.builtin.git:
     repo: "{{gitrepourl}}"
-    dest: /tmp/coursework
+    dest: /tmp/V2coursework
     version: master
     force: yes
     update: yes
@@ -26,7 +26,7 @@
     mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
 - name:	Copy src folder
   ansible.builtin.copy:
-    src: /tmp/coursework/src/
+    src: /tmp/V2coursework/src/
     dest: /shared/almalinux/src/
     owner: almalinux
     group: almalinux
@@ -45,7 +45,7 @@
     mode: "0755"
 - name: Copy scripts folder
   ansible.builtin.copy:
-    src: /tmp/coursework/scripts/
+    src: /tmp/V2coursework/scripts/
     dest: /shared/almalinux/scripts/
     owner: almalinux
     group: almalinux
@@ -64,7 +64,7 @@
     mode: "0755"
 - name:	Copy experiment_ids file
   ansible.builtin.copy:
-    src: /tmp/coursework/data/experiment_ids.txt
+    src: /tmp/V2coursework/data/experiment_ids.txt
     dest: /shared/almalinux/data/experiment_ids.txt
     owner: almalinux
     group: almalinux
@@ -72,5 +72,5 @@
     remote_src:	yes
 - name: Delete git repoistory download fdoler
   ansible.builtin.file:
-    path: /tmp/coursework
+    path: /tmp/V2coursework
     state: absent

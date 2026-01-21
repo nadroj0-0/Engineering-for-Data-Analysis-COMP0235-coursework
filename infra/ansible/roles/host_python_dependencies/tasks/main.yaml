@@ -5,3 +5,6 @@
 - name: Install Celery[redis]
   ansible.builtin.pip:
     name: "celery[redis]"
+- name: Install MinIO Python client
+  ansible.builtin.pip:
+    name: minio

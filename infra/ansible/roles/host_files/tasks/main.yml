@@ -2,20 +2,20 @@
 #Clone all the necessary folders and files from the git repo and put inside nfs
 - name: Create temporary git directory
   ansible.builtin.file:
-    path: /tmp/coursework
+    path: /tmp/V2coursework
     state: directory
     mode: "0755"
 
 # Temporary fix whilst gitlab is down - MUST DELETE BEFORE SUBMISSION
-- name: Copy coursework repo from hub to storage node
+- name: Copy V2coursework repo from hub to storage node
   ansible.builtin.synchronize:
-    src: /home/almalinux/coursework/
-    dest: /tmp/coursework/
+    src: /home/almalinux/V2coursework/
+    dest: /tmp/V2coursework/
 
-#- name: Temporary clone entire coursework git repository
+#- name: Temporary clone entire V2coursework git repository
 #  ansible.builtin.git:
 #    repo: "{{gitrepourl}}"
-#    dest: /tmp/coursework
+#    dest: /tmp/V2coursework
 #    version: master
 #    force: yes
 #    update: yes
@@ -36,7 +36,7 @@
 
 - name: Copy data folder
   ansible.builtin.copy:
-    src: /tmp/coursework/data/
+    src: /tmp/V2coursework/data/
     dest: /home/almalinux/data/
     owner: almalinux
     group: almalinux
@@ -59,7 +59,7 @@
 
 - name: Copy src folder
   ansible.builtin.copy:
-    src: /tmp/coursework/src/
+    src: /tmp/V2coursework/src/
     dest: /home/almalinux/src/
     owner: almalinux
     group: almalinux
@@ -68,5 +68,5 @@
 
 - name: Delete git repoistory download fdoler
   ansible.builtin.file:
-    path: /tmp/coursework
+    path: /tmp/V2coursework
     state: absent

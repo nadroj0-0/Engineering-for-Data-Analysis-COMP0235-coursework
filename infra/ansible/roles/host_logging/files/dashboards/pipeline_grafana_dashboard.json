@@ -1324,7 +1324,7 @@
             "uid": "prometheus_comp0235"
           },
           "editorMode": "code",
-          "expr": "(\n  (\n    floor (sum by (run) (task_executions_total{run!=\"\"}) / 6)\n    and on (run)\n    (\n      sum by (run) (task_executions_total{run!=\"\"})\n      /\n      max by (run) (pipeline_expected_tasks_total{run!=\"\"})\n    ) < 1\n  )\n  or\n  (\n    sum by (run) (task_executions_total{run!=\"\"}) / 6\n    and on (run)\n    (\n      sum by (run) (task_executions_total{run!=\"\"})\n      /\n      max by (run) (pipeline_expected_tasks_total{run!=\"\"})\n    ) >= 1\n  )\n)\nand on (run)\n(\n  (time() - pipeline_last_task_completion_time{run!=\"\"}) < $grace_window\n)\n",
+          "expr": "(\n  (\n    floor (sum by (run) (task_executions_total{run!=\"\"}))\n    and on (run)\n    (\n      sum by (run) (task_executions_total{run!=\"\"})\n      /\n      max by (run) (pipeline_expected_tasks_total{run!=\"\"})\n    ) < 1\n  )\n  or\n  (\n    sum by (run) (task_executions_total{run!=\"\"})\n    and on (run)\n    (\n      sum by (run) (task_executions_total{run!=\"\"})\n      /\n      max by (run) (pipeline_expected_tasks_total{run!=\"\"})\n    ) >= 1\n  )\n)\nand on (run)\n(\n  (time() - pipeline_last_task_completion_time{run!=\"\"}) < $grace_window\n)\n",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1540,7 +1540,7 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},

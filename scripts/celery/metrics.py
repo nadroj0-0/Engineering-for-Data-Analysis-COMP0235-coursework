@@ -204,6 +204,7 @@ def pipeline_finished(run_id=None):
     set_timestamp("last_pipeline_completion_time", labels)
 
 def pipeline_exp_tasks(run_id, num_seqs):
-    tasks_per_seq = 6
-    exp_tasks = num_seqs * tasks_per_seq
-    set_gauge("pipeline_expected_tasks_total",{"run": run_id},exp_tasks)
+#    tasks_per_seq = 6
+#    exp_tasks = num_seqs * tasks_per_seq
+#    set_gauge("pipeline_expected_tasks_total",{"run": run_id},exp_tasks)
+    set_gauge("pipeline_expected_tasks_total", {"run": run_id}, num_seqs)
