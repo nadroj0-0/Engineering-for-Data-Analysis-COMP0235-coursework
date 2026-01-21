@@ -15,6 +15,22 @@
     name: minio-user
   become: true
   become_user: root
+- name: Check if MinIO password already exists on host
+  ansible.builtin.stat:
+    path: /home/almalinux/miniopass
+  register: minio_pass_file
+- name: Generate MinIO password if missing
+  ansible.builtin.command: openssl rand -base64 32
+  register: generated_minio_pass
+  when: not minio_pass_file.stat.exists
+  no_log: true
+- name: Create .miniopass file (first run only)
+  ansible.builtin.copy:
+    dest: "{{ playbook_dir }}/.miniopass"
+    content: "{{ generated_minio_pass.stdout }}"
+    mode: "0600"
+  when: not minio_pass_file.stat.exists
+  no_log: true
 - name: Copy TLS generation stub
   ansible.builtin.copy:
     mode: "0700"
