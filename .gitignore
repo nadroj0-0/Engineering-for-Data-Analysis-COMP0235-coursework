@@ -37,3 +37,5 @@ docs/*.tar.gz
 #OS/editor junk
 Thumbs.db
 
+#Ignore .miniopass
+.miniopass
