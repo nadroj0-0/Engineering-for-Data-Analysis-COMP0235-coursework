@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 /path/to/lecturer_key"
+  exit 1
+fi
+
+LECTURER_KEY="$1"
+
+if [ ! -f "$LECTURER_KEY" ]; then
+  echo "ERROR: lecturer key not found at $LECTURER_KEY"
+  exit 1
+fi
+
 USER="almalinux"
 INVENTORY="inventory.ini"
 PROVISION="provision_cluster.sh"
@@ -32,15 +44,41 @@ fi
 
 echo "Host IP: $HOST_IP"
 
+USER_KEY="$HOME/.ssh/user_key"
+
+if [ ! -f "$USER_KEY" ]; then
+  echo "Creating user ssh key at $USER_KEY"
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+  ssh-keygen -t ed25519 -f "$USER_KEY" -N ""
+else
+  echo "User ssh key already exists"
+fi
+
+SSH_OPTS="-i $LECTURER_KEY -o IdentitiesOnly=no"
+
+echo "Ensuring .ssh directory exists on host"
+ssh $SSH_OPTS ${USER}@${HOST_IP} \
+  "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
+
+echo "Copying user ssh key to host"
+scp $SSH_OPTS ${USER_KEY}.pub ${USER}@${HOST_IP}:~/.ssh/user_key.pub
+
+ssh $SSH_OPTS ${USER}@${HOST_IP} \
+  "cat ~/.ssh/user_key.pub >> ~/.ssh/authorized_keys"
+
+
+
 echo "Creating bootstrap directory on host"
-ssh ${USER}@${HOST_IP} "mkdir -p ~/bootstrap"
+ssh $SSH_OPTS ${USER}@${HOST_IP} "mkdir -p ~/bootstrap"
 
 echo "Copying inventory.ini"
-scp "$INVENTORY" ${USER}@${HOST_IP}:~/bootstrap/inventory.ini
+scp $SSH_OPTS "$INVENTORY" ${USER}@${HOST_IP}:~/bootstrap/inventory.ini
 
 echo "Copying provision_cluster.sh"
-scp "$PROVISION" ${USER}@${HOST_IP}:~/bootstrap/provision_cluster.sh
-ssh ${USER}@${HOST_IP} "chmod +x ~/bootstrap/provision_cluster.sh"
+scp $SSH_OPTS "$PROVISION" ${USER}@${HOST_IP}:~/bootstrap/provision_cluster.sh
+ssh $SSH_OPTS ${USER}@${HOST_IP} "chmod +x ~/bootstrap/provision_cluster.sh"
 
 echo "Bootstrap complete"
-echo "Log into the host VM and follow: ~/bootstrap/README.md"
+echo "Log into the host VM with:"
+echo "ssh -i ~/.ssh/user_key ${USER}@${HOST_IP} and follow: ~/bootstrap/README.md"
