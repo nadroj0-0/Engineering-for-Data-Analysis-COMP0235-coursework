@@ -65,7 +65,7 @@ else
   echo "User ssh key already exists"
 fi
 
-SSH_OPTS="-i $LECTURER_KEY -o IdentitiesOnly=no"
+SSH_OPTS="-o IdentitiesOnly=no"
 
 echo "Ensuring .ssh directory exists on host"
 ssh $SSH_OPTS ${USER}@${HOST_IP} \

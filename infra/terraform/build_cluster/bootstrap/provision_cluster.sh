@@ -11,6 +11,24 @@ if [ ! -f "$INVENTORY_FILE" ]; then
   exit 1
 fi
 
+echo "Patching inventory for local host execution"
+awk '
+  /^\[host\]/ { in_host=1; print; next }
+  /^\[/ { in_host=0; print; next }
+  in_host && NF {
+    if ($0 !~ /ansible_connection=local/) {
+      print $0 " ansible_connection=local"
+    } else {
+      print
+    }
+    next
+  }
+  { print }
+' "$INVENTORY_FILE" > "${INVENTORY_FILE}.tmp"
+
+mv "${INVENTORY_FILE}.tmp" "$INVENTORY_FILE"
+
+
 echo "Installing dependencies"
 sudo dnf -y install python3-pip
 sudo python3 -m pip install --upgrade pip
