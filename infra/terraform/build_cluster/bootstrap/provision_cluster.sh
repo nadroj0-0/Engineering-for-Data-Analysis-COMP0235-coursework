@@ -13,8 +13,9 @@ fi
 
 echo "Installing dependencies"
 sudo dnf -y install python3-pip
-sudo python3 -m pip install --upgrade pip
+sudo python3 -m pip install --user --upgrade pip
 sudo python3 -m pip install --user ansible
+export PATH="$HOME/.local/bin:$PATH"
 sudo dnf -y install git
 
 SSH_KEY="$HOME/.ssh/id_cluster"
