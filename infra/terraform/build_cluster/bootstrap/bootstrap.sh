@@ -42,25 +42,5 @@ echo "Copying provision_cluster.sh"
 scp "$PROVISION" ${USER}@${HOST_IP}:~/bootstrap/provision_cluster.sh
 ssh ${USER}@${HOST_IP} "chmod +x ~/bootstrap/provision_cluster.sh"
 
-echo "Writing host README"
-ssh ${USER}@${HOST_IP} "cat > ~/bootstrap/README.md << 'EOF'
-# Host Provisioning
-This directory contains the files required to provision the cluster
-from inside the host VM.
-
-## Usage
-Run the following commands on the host VM:
-
-```bash
-cd ~/bootstrap
-./provision_cluster.sh
-```
-
-This will:
-- clone repo to tmp
-- provision cluster using ansible and inventory
-- clean tmp files
-EOF"
-
 echo "Bootstrap complete"
 echo "Log into the host VM and follow: ~/bootstrap/README.md"

@@ -7,9 +7,32 @@ Usage: python3 generate_inventory.py [--write-ini inventory.ini]
 import json
 import subprocess
 import argparse
+from pathlib import Path
+import sys
 
-def run(command):
-    return subprocess.run(command, capture_output=True, encoding='UTF-8')
+def find_terraform_dir(start_path):
+    """
+    Go up from `start_path` until find Terraform working directory.
+    """
+    cur = start_path.resolve()
+    while True:
+        if (cur / ".terraform").exists() or any(cur.glob("*.tf")):
+            return cur
+        if cur.parent == cur:
+            raise RuntimeError(
+                "Could not locate Terraform directory "
+                "(searched upwards from script and CWD)"
+            )
+        cur = cur.parent
+try: #Try cwd first, script location 2nd
+    TERRAFORM_DIR = find_terraform_dir(Path.cwd())
+except RuntimeError:
+    TERRAFORM_DIR = find_terraform_dir(Path(__file__).resolve().parent)
+
+
+
+def run(command, **kwargs):
+    return subprocess.run(command, capture_output=True, encoding='UTF-8', **kwargs)
 
 def render_ini(inv):
     lines=[]
@@ -23,7 +46,7 @@ def render_ini(inv):
 
 def generate_inventory():
     host_cmd = "terraform output --json host_ips".split()
-    host_ip_list = json.loads(run(host_cmd).stdout)
+    host_ip_list = json.loads(run(host_cmd, cwd=TERRAFORM_DIR).stdout)
     host = host_ip_list[0]
 
     host_vars = {}
@@ -35,7 +58,7 @@ def generate_inventory():
     workers = []
 
     worker_cmd = "terraform output --json worker_ips".split()
-    worker_ips = json.loads(run(worker_cmd).stdout)
+    worker_ips = json.loads(run(worker_cmd, cwd=TERRAFORM_DIR).stdout)
 
     for a in worker_ips:
         name = a

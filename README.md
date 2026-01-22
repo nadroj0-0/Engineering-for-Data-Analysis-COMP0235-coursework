@@ -309,3 +309,26 @@ Next Steps
 - Clean and polish repository
 - Write deployment and viva walkthrough documentation
 - Optional: add one well-scoped extension feature
+
+
+
+
+Instructions for bootstrap
+```bash
+./bootstrap.sh
+Run from infra/terraform/build_cluster/boostrap
+
+ssh almalinux@<host_ip>
+
+Run the following commands on the host VM:
+
+```bash
+cd ~/bootstrap
+./provision_cluster.sh
+
+This directory contains the files required to provision the cluster
+from inside the host VM.
+This will:
+- clone repo to tmp
+- provision cluster using ansible and inventory
+- clean tmp files
