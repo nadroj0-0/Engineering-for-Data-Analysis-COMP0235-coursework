@@ -3,7 +3,13 @@
   hosts: workers
   become: true
   vars:
-    ssh_pub_key_path: /home/almalinux/.ssh/id_cluster.pub
+    ssh_cluster_key: /home/almalinux/.ssh/id_cluster.pub
+    ansible_user: almalinux
+    ansible_ssh_common_args :  >
+      -o IdentitiesOnly=no
+      -o PreferredAuthentications=publickey
+      -i /home/almalinux/.ssh/lecturer_key
+
 
   tasks:
     - name: Ensure .ssh directory exists
@@ -17,4 +23,4 @@
       ansible.posix.authorized_key:
         user: almalinux
         state: present
-        key: "{{ lookup('ansible.builtin.file', ssh_pub_key_path) }}"
+        key: "{{ lookup('ansible.builtin.file', ssh_cluster_key) }}"

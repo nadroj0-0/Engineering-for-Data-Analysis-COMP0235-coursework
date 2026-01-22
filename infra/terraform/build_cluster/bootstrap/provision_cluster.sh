@@ -46,6 +46,7 @@ ansible-playbook -i "$INVENTORY_FILE" bootstrap_ssh.yaml
 
 echo "Running Ansible provisioning"
 cd "$TMP_DIR/repo/infra/ansible"
-ansible-playbook -i "$INVENTORY_FILE" full.yaml
+ansible-playbook -i "$INVENTORY_FILE" --private-key "$HOME/.ssh/id_cluster" full.yaml
+
 
 echo "Provisioning complete"
