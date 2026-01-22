@@ -1,9 +1,0 @@
-broker_url='redis://{{groups["host"][0]}}:6379/0'
-result_backend='redis://{{groups["host"][0]}}:6379/0'
-timezone = 'Europe/Oslo'
-
-result_backend_transport_options = {
-        'retry_policy': {
-            'timeout': 5.0}
-}
-visibility_timeout = 43200

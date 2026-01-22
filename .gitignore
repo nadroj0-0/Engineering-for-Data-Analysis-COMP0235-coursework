@@ -19,11 +19,16 @@ diary.md
 **/.terraform.tfstate.lock.info
 **/terraform-provider-*
 **/.terraform_backup/
+**/*.tf.bak
+**/*backup*
 
 #Logs + results
 logs/
 results/
 #data/example_output/
+
+# Archived Ansible roles
+infra/ansible/roles/archive/
 
 #Pipeline example
 #src/pipeline_example/

@@ -1,9 +1,0 @@
----
-- name: Worker configuration
-  hosts: workers
-  become: true
-  roles:
-    - worker_python
-    - worker_pipeline
-    - worker_storage
-    - worker_celery  

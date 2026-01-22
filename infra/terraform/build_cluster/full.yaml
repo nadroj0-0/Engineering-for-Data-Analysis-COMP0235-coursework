@@ -1,4 +1,0 @@
----
-- import_playbook: all.yaml
-- import_playbook: host.yaml
-- import_playbook: workers.yaml

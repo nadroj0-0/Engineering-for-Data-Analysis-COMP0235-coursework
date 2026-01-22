@@ -1,9 +1,0 @@
----
-- name: Setup for all nodes
-  hosts: all
-  become: true
-  roles:
-  - common
-  - reboot
-  - openmpi
-  - python312

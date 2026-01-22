@@ -1,7 +1,0 @@
----
-- name: Host configuration
-  hosts: host
-  become: true
-  roles:
-    - host_storage
-    - host_redis
