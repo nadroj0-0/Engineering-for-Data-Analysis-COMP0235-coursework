@@ -39,10 +39,26 @@ trap cleanup EXIT
 echo "Cloning provisioning repository"
 git clone --branch "$BRANCH" "$REPO_URL" "$TMP_DIR/repo"
 
+LECTURER_KEY="$HOME/.ssh/lecturer_key"
+
+if [ -f "$LECTURER_KEY" ]; then
+  echo "Lecturer key found – using it for bootstrap SSH"
+  BOOTSTRAP_SSH_ARGS="-i $LECTURER_KEY"
+else
+  echo "Lecturer key not found – using default SSH identities"
+  BOOTSTRAP_SSH_ARGS=""
+fi
+
+
 echo "Distributing cluster ssh keys"
 cd "$TMP_DIR/repo/infra/ansible"
-ANSIBLE_HOST_KEY_CHECKING=False \
-ansible-playbook -i "$INVENTORY_FILE" bootstrap_ssh.yaml
+ANSIBLE_HOST_KEY_CHECKING=False
+if [ -n "$BOOTSTRAP_SSH_ARGS" ]; then
+  ansible-playbook -i "$INVENTORY_FILE" -e "ansible_ssh_common_args=$BOOTSTRAP_SSH_ARGS" \
+  bootstrap_ssh.yaml
+else
+  ansible-playbook -i "$INVENTORY_FILE" bootstrap_ssh.yaml
+fi
 
 echo "Running Ansible provisioning"
 cd "$TMP_DIR/repo/infra/ansible"
