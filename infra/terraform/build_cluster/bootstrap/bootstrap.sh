@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -e
 
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 /path/to/lecturer_key"
+DEFAULT_LECTURER_KEY="../../../../keys/lecturer_key.pub"
+
+if [ $# -eq 1 ]; then
+  LECTURER_KEY="$1"
+elif [ $# -eq 0 ] && [ -f "$DEFAULT_LECTURER_KEY" ]; then
+  echo "No lecturer key argument supplied, using default:"
+  echo "  $DEFAULT_LECTURER_KEY"
+  LECTURER_KEY="$DEFAULT_LECTURER_KEY"
+else
+  echo "Usage: $0 /path/to/lecturer_key.pub"
+  echo
+  echo "Tried default path but did not find lecturer key:"
+  echo "  $DEFAULT_LECTURER_KEY"
   exit 1
 fi
-
-LECTURER_KEY="$1"
 
 if [ ! -f "$LECTURER_KEY" ]; then
   echo "ERROR: lecturer key not found at $LECTURER_KEY"
