@@ -14,8 +14,19 @@ fi
 echo "Installing dependencies"
 sudo dnf -y install python3-pip
 sudo python3 -m pip install --upgrade pip
-sudo python3 -m pip install ansible
+sudo python3 -m pip install --user ansible
 sudo dnf -y install git
+
+SSH_KEY="$HOME/.ssh/id_cluster"
+
+if [ ! -f "$SSH_KEY" ]; then
+  echo "Creating cluster SSH key at $SSH_KEY"
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+  ssh-keygen -t ed25519 -f "$SSH_KEY" -N ""
+else
+  echo "Cluster SSH key already exists, skipping generation"
+fi
 
 TMP_DIR=$(mktemp -d)
 echo "Using temporary directory: $TMP_DIR"
@@ -27,6 +38,11 @@ trap cleanup EXIT
 
 echo "Cloning provisioning repository"
 git clone --branch "$BRANCH" "$REPO_URL" "$TMP_DIR/repo"
+
+echo "Distributing cluster ssh keys"
+cd "$TMP_DIR/repo/infra/ansible"
+ANSIBLE_HOST_KEY_CHECKING=False \
+ansible-playbook -i "$INVENTORY_FILE" bootstrap_ssh.yaml
 
 echo "Running Ansible provisioning"
 cd "$TMP_DIR/repo/infra/ansible"
