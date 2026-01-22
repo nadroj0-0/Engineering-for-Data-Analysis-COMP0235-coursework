@@ -36,7 +36,11 @@ def run(command, **kwargs):
 
 def render_ini(inv):
     lines=[]
-    for group in ["host", "workers", "storage"]:
+    lines.append("[host]")
+    for h in inv["host"]["hosts"]:
+        lines.append(f"{h} ansible_connection=local")
+    lines.append("")
+    for group in ["workers", "storage"]:
         lines.append(f"[{group}]")
         for h in inv[group]["hosts"]:
             lines.append(h)

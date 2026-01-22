@@ -72,10 +72,11 @@ ssh $SSH_OPTS ${USER}@${HOST_IP} \
   "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
 
 echo "Copying user ssh key to host"
-scp $SSH_OPTS ${USER_KEY}.pub ${USER}@${HOST_IP}:~/.ssh/user_key.pub
-
-ssh $SSH_OPTS ${USER}@${HOST_IP} \
-  "cat ~/.ssh/user_key.pub >> ~/.ssh/authorized_keys"
+ssh $SSH_OPTS ${USER}@${HOST_IP} "
+  mkdir -p ~/.ssh && chmod 700 ~/.ssh
+  grep -qxF \"$(cat ${USER_KEY}.pub)\" ~/.ssh/authorized_keys \
+    || echo \"$(cat ${USER_KEY}.pub)\" >> ~/.ssh/authorized_keys
+"
 
 
 
