@@ -3,6 +3,5 @@
   hosts: workers
   become: true
   roles:
-#    - worker_configure_nfs
     - worker_python_dependencies
     - worker_configure_celery

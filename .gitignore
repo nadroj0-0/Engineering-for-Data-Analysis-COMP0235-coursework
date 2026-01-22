@@ -44,3 +44,7 @@ Thumbs.db
 
 #Ignore .miniopass
 .miniopass
+
+#Ignore ops.yml
+infra/ansible/roles/worker_configure_celery/tasks/ops.yml
+

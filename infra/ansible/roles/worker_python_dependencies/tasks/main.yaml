@@ -1,24 +1,5 @@
 ---
 # tasks for worker python environment
-#- name: Create worker virtual environment
-#  ansible.builtin.command:
-#    cmd: python3.12 -m venv /home/almalinux/worker-venv    #make a virtual environemtn
-#  args:
-#    creates: /home/almalinux/worker-venv/bin/activate      #doesnt remake if already exists (idempotent)
-#- name: Fix venv ownership
-#  ansible.builtin.file:
-#    path: /home/almalinux/worker-venv
-#    owner: almalinux
-#    group: almalinux
-#    recurse: yes
-#- name: Install Celery[redis]
-#  ansible.builtin.pip:
-#    virtualenv: /home/almalinux/worker-venv
-#    name: "celery[redis]"
-#- name: Remove worker venv
-#  ansible.builtin.file:
-#    path: /home/almalinux/worker-venv
-#    state: absent
 - name: Install Celery[redis]
   ansible.builtin.pip:
     name: "celery[redis]"

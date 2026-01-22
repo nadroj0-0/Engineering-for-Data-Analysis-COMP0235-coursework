@@ -29,33 +29,6 @@ def insert_protein(cursor, protein_id, payload):
     """
     cursor.execute(query, (protein_id, payload))
 
-#def read_fasta_file(file_path):
-#    """
-#    Read a FASTA file and return a list of (id, payload)
-#
-#    id: start of entry (after > up to first space)
-#    payload: full FASTA entry including >
-#    """
-#    records = []
-#    current_id = None
-#    current_payload = ""
-#    with open(file_path, "r") as file:
-#        for line in file:
-#            if line.startswith(">"):
-#                # Save previous entry
-#                if current_id is not None:
-#                    records.append((current_id, current_payload))
-#
-#                current_id = line[1:].split(" ")[0]  # remove '>' and extract id
-#                current_payload = line # Start new payload
-#            else:
-#                current_payload = current_payload + line # Add line to payload of lines
-#    if current_id is not None:
-#        records.append((current_id, current_payload))
-#
-#    return records
-
-
 def read_fasta_file(file_path):
     """
     Read a FASTA file and return a list of (id, sequence)

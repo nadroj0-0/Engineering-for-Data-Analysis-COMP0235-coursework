@@ -1,4 +1,3 @@
 ---
 - import_tasks: worker_celery.yaml
-#- import_tasks: ops.yml
 

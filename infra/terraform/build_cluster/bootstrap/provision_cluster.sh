@@ -27,6 +27,6 @@ git clone --branch "$BRANCH" "$REPO_URL" "$TMP_DIR/repo"
 
 echo "Running Ansible provisioning"
 cd "$TMP_DIR/repo/infra/ansible"
-ansible-playbook -i "$INVENTORY_FILE" full.yml
+ansible-playbook -i "$INVENTORY_FILE" full.yaml
 
 echo "Provisioning complete"

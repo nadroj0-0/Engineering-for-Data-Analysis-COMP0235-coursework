@@ -14,15 +14,3 @@
       CREATE TABLE IF NOT EXISTS proteins ( 
         id TEXT PRIMARY KEY,
         payload TEXT NOT NULL);
-#- name: Create results table
-#  become: true
-#  become_user: postgres
-#  community.postgresql.postgresql_query:
-#    db: pipeline_db
-#    query: |
-#      CREATE TABLE IF NOT EXISTS results (
-#        id TEXT NOT NULL,
-#        run_id TEXT NOT NULL,
-#        status TEXT,
-#        result_path TEXT,
-#        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);

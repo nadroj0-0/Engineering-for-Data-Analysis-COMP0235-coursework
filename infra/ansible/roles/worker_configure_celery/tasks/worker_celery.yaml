@@ -1,11 +1,5 @@
 ---
 # tasks for celery worker setup
-#- name: Make home dir accesible by systemd
- # ansible.builtin.file:
-  #  path: /home/almalinux
-   # mode: '0755'
-    #owner: almalinux
-    #group: almalinux
 - name: Deploy celeryconfig.py  #dynamically create celeryconfig (incase ip of host changes)
   ansible.builtin.template:
     src: celeryconfig.py.j2
