@@ -12,7 +12,9 @@ if [ ! -f "$INVENTORY_FILE" ]; then
 fi
 
 echo "Installing dependencies"
-sudo dnf -y install git ansible
+sud dnf -y install python3-pip
+python3 -m pip install ansible
+sudo dnf -y install git
 
 TMP_DIR=$(mktemp -d)
 echo "Using temporary directory: $TMP_DIR"
