@@ -22,6 +22,7 @@ if [ ! -f "$LECTURER_KEY" ]; then
   exit 1
 fi
 
+
 USER="almalinux"
 INVENTORY="inventory.ini"
 PROVISION="provision_cluster.sh"
@@ -75,6 +76,27 @@ scp $SSH_OPTS ${USER_KEY}.pub ${USER}@${HOST_IP}:~/.ssh/user_key.pub
 
 ssh $SSH_OPTS ${USER}@${HOST_IP} \
   "cat ~/.ssh/user_key.pub >> ~/.ssh/authorized_keys"
+
+
+
+USER_SSH="-i $USER_KEY -o IdentitiesOnly=yes"
+
+ssh $USER_SSH ${USER}@${HOST_IP} '
+  set -e
+  if [ ! -f ~/.ssh/id_cluster ]; then
+    echo "Creating cluster SSH key at $SSH_KEY"
+    mkdir -p ~/.ssh 
+    chmod 700 ~/.ssh
+    ssh-keygen -t ed25519 -f ~/.ssh/id_cluster -N ""
+  else
+    echo "Cluster SSH key already exists, skipping generation"
+  fi
+'
+
+echo "Distributing cluster ssh keys"
+ANSIBLE_HOST_KEY_CHECKING=False \
+ANSIBLE_SSH_ARGS="-o IdentitiesOnly=no" \
+ansible-playbook -i "$INVENTORY_FILE" bootstrap_ssh.yaml
 
 
 

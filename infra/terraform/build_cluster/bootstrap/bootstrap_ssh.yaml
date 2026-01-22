@@ -1,0 +1,35 @@
+---
+#Distribute host ssh key to workers
+- name: Retrieve cluster pub key from host
+  hosts: host
+  gather_facts: false
+  vars:
+    cluster_key_path: /home/almalinux/.ssh/id_cluster.pub
+  tasks:
+    - name: Read cluster public key
+      slurp:
+        src: "{{ cluster_key_path }}"
+      register: cluster_key_raw
+
+    - name: Set cluster public key fact
+      set_fact:
+        cluster_pubkey: "{{ cluster_key_raw.content | b64decode }}"
+
+- name: Install cluster key on workers
+  hosts: workers
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Ensure .ssh exists
+      file:
+        path: /home/almalinux/.ssh
+        state: directory
+        owner: almalinux
+        group: almalinux
+        mode: '0700'
+
+    - name: Authorise cluster SSH key
+      authorized_key:
+        user: almalinux
+        key: "{{ hostvars[groups['host'][0]].cluster_pubkey }}"
+        state: present
