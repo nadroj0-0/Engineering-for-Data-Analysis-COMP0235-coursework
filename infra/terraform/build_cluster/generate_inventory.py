@@ -1,11 +1,25 @@
 #!/usr/bin/env python3
 
+"""Generate an Ansible inventory from Terraform outputs.
+Usage: python3 generate_inventory.py [--write-ini inventory.ini]
+"""
+
 import json
 import subprocess
 import argparse
 
 def run(command):
     return subprocess.run(command, capture_output=True, encoding='UTF-8')
+
+def render_ini(inv):
+    lines=[]
+    for group in ["host", "workers", "storage"]:
+        lines.append(f"[{group}]")
+        for h in inv[group]["hosts"]:
+            lines.append(h)
+        lines.append("")
+    return "\n".join(lines)
+
 
 def generate_inventory():
     host_cmd = "terraform output --json host_ips".split()
@@ -47,8 +61,7 @@ def generate_inventory():
     _jd["host"] = _host
     _jd["storage"] = _storage
 
-    jd = json.dumps(_jd, indent=4)
-    return jd
+    return _jd
 
 
 if __name__ == "__main__":
@@ -61,13 +74,22 @@ if __name__ == "__main__":
     mo = ap.add_mutually_exclusive_group()
     mo.add_argument("--list",action="store", nargs="*", default="dummy", help="Show JSON of all managed hosts")
     mo.add_argument("--host",action="store", help="Display vars related to the host")
+    ap.add_argument("--write-ini", metavar="PATH", help="Write static inventory.ini file to PATH")
 
     args = ap.parse_args()
+
+    inventory = generate_inventory()
+
+    if args.write_ini:
+        ini = render_ini(inventory)
+        with open(args.write_ini, "w", encoding="utf-8") as f:
+            f.write(ini)
+        print(f"Wrote inventory to {args.write_ini}")
+        raise SystemExit(0)
 
     if args.host:
         print(json.dumps({}))
     elif len(args.list) >= 0:
-        jd = generate_inventory()
-        print(jd)
+        print(json.dumps(inventory, indent=4))
     else:
         raise ValueError("Expecting either --host $HOSTNAME or --list")
