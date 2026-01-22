@@ -96,7 +96,7 @@ ssh $USER_SSH ${USER}@${HOST_IP} '
 echo "Distributing cluster ssh keys"
 ANSIBLE_HOST_KEY_CHECKING=False \
 ANSIBLE_SSH_ARGS="-o IdentitiesOnly=no" \
-ansible-playbook -i "$INVENTORY_FILE" bootstrap_ssh.yaml
+ansible-playbook -i "$INVENTORY" bootstrap_ssh.yaml
 
 
 
