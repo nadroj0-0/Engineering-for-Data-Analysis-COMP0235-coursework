@@ -1,6 +1,6 @@
 # Cleaning Scripts
 
-Scripts in this directory remove intermediate data, metrics, or outputs.
+Scripts in this directory remove intermediate data or outputs.
 
 ## Descriptions
 
@@ -13,5 +13,3 @@ Scripts in this directory remove intermediate data, metrics, or outputs.
 - `clean_minio_run.sh <run_name>`
   Deletes MinIO objects associated with a specific run.
 
-- `clean_metrics_run.sh <run_name>`
-  Removes Prometheus textfile metrics for a specific run.
