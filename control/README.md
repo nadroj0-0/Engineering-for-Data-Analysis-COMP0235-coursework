@@ -25,7 +25,22 @@ Retrieves final aggregated CSV outputs for a given run from MinIO to the host.
   ~/results/<run_name>
 
 ### `check_worker_logs.sh`
-Uses Ansible to fetch and display recent (last 60 mins) worker logs across all nodes.
+Uses Ansible to fetch and display recent (default : last 60 mins, tail) worker logs across all nodes.
+
+Usage:
+  ./check_worker_logs.sh [--since MINUTES] [--full]
+
+Examples:
+  ./check_worker_logs.sh
+  ./check_worker_logs.sh --since 120
+  ./check_worker_logs.sh --since 480 --full
+  ./check_worker_logs.sh --since 480 --full
+
+### sanity_check_progress.sh
+Sanity check to compare Prometheus task completion count with MinIO object count for a run.
+
+Usage:
+  ./sanity_check_progress.sh <run_name>
 
 
 ##Subdirectories:
