@@ -1,39 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-  echo "usage: $0 <protein_id>"
+# ---- Configuration ----
+PYTHON_SCRIPT="/shared/almalinux/scripts/celery/lecturer_example_validation.py"
+FASTA_FILE="/home/almalinux/src/pipeline_example/test.fa"
+RUN_NAME="lecturer_example"
+
+# ---- Sanity checks ----
+if [[ ! -f "$PYTHON_SCRIPT" ]]; then
+  echo "ERROR: Validation Python script not found:"
+  echo "  $PYTHON_SCRIPT"
   exit 1
 fi
 
-PROTEIN_ID="$1"
-RUN_NAME="lecturer_example_fasta"
-
-PIPELINE_SCRIPT="/shared/almalinux/scripts/celery/run_pipeline_host.py"
-TMP_IDS="/tmp/experiment_ids_${RUN_NAME}.txt"
-
-echo "Validating protein exists in database..."
-
-COUNT=$(psql -tA \
-  -d pipeline_db \
-  -U host \
-  -c "SELECT COUNT(*) FROM proteins WHERE id='${PROTEIN_ID}';")
-
-if [[ "$COUNT" != "1" ]]; then
-  echo "ERROR: protein ID not found in database:"
-  echo "  ${PROTEIN_ID}"
+if [[ ! -f "$FASTA_FILE" ]]; then
+  echo "ERROR: Lecturer example FASTA not found:"
+  echo "  $FASTA_FILE"
   exit 1
 fi
 
-echo "Protein found."
-echo "Creating experiment ID file: ${TMP_IDS}"
-
-echo "${PROTEIN_ID}" > "${TMP_IDS}"
-
+echo "=============================================="
+echo "Lecturer example validation run"
 echo
-echo "Launching lecturer reference validation run"
-echo "  Protein ID: ${PROTEIN_ID}"
-echo "  Run name:   ${RUN_NAME}"
+echo "FASTA file : $FASTA_FILE"
+echo "Run name   : $RUN_NAME"
+echo
+echo "This will run the pipeline on a single sequence"
+echo "and allow comparison with lecturer reference."
+echo "=============================================="
 echo
 
-exec python3 "${PIPELINE_SCRIPT}" "${TMP_IDS}" "${RUN_NAME}"
+# ---- Execute ----
+exec python3 "$PYTHON_SCRIPT" "$FASTA_FILE" "$RUN_NAME"

@@ -8,4 +8,4 @@ fi
 
 RUN_ID="$1"
 
-python3 /home/almalinux/src/minio_tools/pull_results.py "$RUN_ID"
+python3 /shared/scripts/pull_results.py "$RUN_ID"
