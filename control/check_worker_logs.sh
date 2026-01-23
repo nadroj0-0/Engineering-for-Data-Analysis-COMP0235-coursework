@@ -1,26 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOSTNAME="$(hostname)"
-LOG_DIR="/var/log/protien_analysis_pipeline"
-LOGFILE="${LOG_DIR}/pipeline_${HOSTNAME}.log"
+CONTROL_DIR="$(cd "$(dirname "$0")" && pwd)"
+INVENTORY="${CONTROL_DIR}/inventory.ini"
+REMOTE_SCRIPT="/home/almalinux/control/check_local_logs.sh"
 
-echo "===== ${HOSTNAME} ====="
-
-if [[ ! -f "$LOGFILE" ]]; then
-    echo "No log file found at ${LOGFILE}"
-    exit 0
-fi
-
-echo "Latest log: ${LOGFILE}"
-echo "---- last 20 minutes ----"
-
-# ISO timestamp from 20 minutes ago
-SINCE="$(date -d '20 minutes ago' '+%Y-%m-%d %H:%M:%S')"
-
-# Print only relevant lines, cap output to avoid terminal spam
-awk -v since="$SINCE" '
-    $0 ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}/ && $0 >= since
-' "$LOGFILE" | tail -n 200
-
+echo "Collecting worker logs (last 60 minutes)"
 echo
+
+ansible workers \
+  -i "$INVENTORY" \
+  -m shell \
+  -a "$REMOTE_SCRIPT"
