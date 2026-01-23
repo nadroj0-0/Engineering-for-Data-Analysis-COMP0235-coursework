@@ -19,7 +19,6 @@ for result in SearchIO.parse(tmp_hhr_path, 'hhsuite3-text'):
         if hit.evalue < 1.e-5:
             good_hit_scores.append(hit.score)
 
-#fhOut = open("hhr_parse.out", "w")
 fhOut = open(hhr_out_path, "w")
 fhOut.write("query_id,best_hit,best_evalue,best_score,score_mean,score_std,score_gmean\n")
 mean=format(np.mean(good_hit_scores), ".2f")

@@ -9,8 +9,6 @@ usage:
     python test_run_pipeline.py <num_ids> [run_name]
 """
 
-# ---- Hardcoded, host-local paths (by design) ----
-
 UNIPROT_FASTA = "/home/almalinux/dataset/uniprot/uniprot_dataset.fasta"
 SELECT_IDS_SCRIPT = "/shared/almalinux/scripts/celery/select_ids.py"
 PIPELINE_SCRIPT   = "/shared/almalinux/scripts/celery/run_pipeline_host.py"

@@ -5,7 +5,6 @@ import io
 from minio.error import S3Error
 import subprocess
 
-#app = Celery('tasks', broker = 'redis://localhost:6379/0', backend='redis://localhost:6379')
 app = Celery('tasks')
 app.config_from_object('celeryconfig')
 
@@ -93,7 +92,6 @@ def write_fasta(seq_paths, sequence):
         return seq_paths
     except Exception as e:
         log_error(task_name, seq_id, f"Failed: {str(e)}")
-#        task_failed(task_name)
         raise
 
 
@@ -113,16 +111,13 @@ def run_parser(seq_paths):
         if not os.path.exists(hhr_file) or os.path.getsize(hhr_file) == 0:
             raise RuntimeError("tmp.hhr missing/empty (HHsearch output not ready)")
 
-#        cmd = ['python', './results_parser.py', hhr_file]
         cmd	= ['python3', '/shared/almalinux/scripts/celery/results_parser.py',
                 hhr_file, seq_paths["hhr_parsed"] ]
-        #path to results_parser.py file
         print(f'STEP 4: RUNNING PARSER: {" ".join(cmd)}')
         p = Popen(cmd, stdin=PIPE,stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
         log_info(task_name, seq_id, f"Parser stdout:\n{out.decode()}")
         if err:
-#            log_error(task_name, seq_id, f"Parser stderr:\n{err.decode()}")
              log_warning(task_name, seq_id, f"Parser warnings (non-fatal):\n{err.decode()}")
         if p.returncode != 0:
             raise RuntimeError(f"results_parser.py failed with code {p.returncode}")
@@ -132,16 +127,12 @@ def run_parser(seq_paths):
         log_storage(seq_id, f"Final output written: {out_file}")
         log_info(task_name, seq_id, "Completed")
         return seq_paths
-#        return out.decode("utf-8")
     except Exception as e:
         log_storage_error(seq_id,f"Failed to write final output {out_file} | {type(e).__name__}: {str(e)}")
-#        log_error(task_name, seq_id, f"Task failed: {str(e)}")
        	log_error(task_name, seq_id, f"Failed: {str(e)}")
-#        task_failed(task_name)
         raise
 
 
-#def run_hhsearch_task(a3m_file):
 def run_hhsearch(seq_paths):
     """
     Run HHSearch to produce the hhr file
@@ -172,13 +163,10 @@ def run_hhsearch(seq_paths):
         log_info(task_name, seq_id, "Completed")
         return seq_paths
     except Exception as e:
-#        log_error(task_name, seq_id, f"Task failed: {str(e)}")
        	log_error(task_name, seq_id, f"Failed: {str(e)}")
-#        task_failed(task_name)
         raise
 
 
-#def read_horiz_task(tmp_file, horiz_file, a3m_file):
 def read_horiz(seq_paths):
     """
     Parse horiz file and concatenate the information to a new tmp a3m file
@@ -219,17 +207,13 @@ def read_horiz(seq_paths):
         if pred == "" or conf == "":
             raise RuntimeError("tmp.horiz did not contain Pred/Conf lines")
 
-        #return a3m_file
         log_info(task_name, seq_id, "Completed")
         return seq_paths
     except Exception as e:
-#        log_error(task_name, seq_id, f"Task failed: {str(e)}")
        	log_error(task_name, seq_id, f"Failed: {str(e)}")
-#        task_failed(task_name)
         raise
 
 
-#def run_s4pred_task(input_file, out_file):
 def run_s4pred(seq_paths):
     """
     Runs the s4pred secondary structure predictor to produce the horiz file
@@ -248,13 +232,10 @@ def run_s4pred(seq_paths):
         out, err = p.communicate()
         with open(out_file, "w") as fh_out:
             fh_out.write(out.decode("utf-8"))
-        #return out_file
         log_info(task_name, seq_id, "Completed")
         return seq_paths
     except Exception as e:
-#        log_error(task_name, seq_id, f"Task failed: {str(e)}")
        	log_error(task_name, seq_id, f"Failed: {str(e)}")
-#        task_failed(task_name)
         raise
 
 
@@ -336,7 +317,6 @@ def run_sequence_task(self, run_id, seq_id, sequence):
     except Exception as e:
         attempt = self.request.retries + 1
         log_error(task_name, seq_id, f"Attempt {attempt} failed: {str(e)}")
-#        task_failed(task_name)
         if self.request.retries >= self.max_retries:
             task_failed(task_name, run_id)
         raise
@@ -371,21 +351,3 @@ def aggregate_results_task(results, run_id):
     log_info("aggregate_results", run_id, "Completed")
     pipeline_finished(run_id)
     return True
-
-#if __name__ == "__main__":
-#
-#    sequences = read_input(sys.argv[1])
-#    tmp_file = "tmp.fas"
-#    horiz_file = "tmp.horiz"
-#    a3m_file = "tmp.a3m"
-#    hhr_file = "tmp.hhr"
-#    for k, v in sequences.items():
-#        print(f'Now analysing input: {k}')
-#        with open(tmp_file, "w") as fh_out:
-#            fh_out.write(f">{k}\n")
-#            fh_out.write(f"{v}\n")
-#        run_s4pred(tmp_file, horiz_file)
-#        read_horiz(tmp_file, horiz_file, a3m_file)
-#        run_hhsearch(a3m_file)
-#        run_parser(hhr_file)
-#        shutil.move("hhr_parse.out", f'{k}_parse.out')
