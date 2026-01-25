@@ -113,4 +113,8 @@ ssh $SSH_OPTS ${USER}@${HOST_IP} "chmod +x ~/provision/provision_cluster.sh"
 
 echo "Bootstrap complete"
 echo "Log into the host VM with:"
-echo "ssh -i ~/.ssh/user_key ${USER}@${HOST_IP} and follow: ~/provision/README.md"
+echo "ssh -i ~/.ssh/user_key ${USER}@${HOST_IP}"
+
+echo "Then run:"
+echo "cd ~/provision"
+echo "./provision_cluster.sh"
