@@ -251,7 +251,7 @@ The pipeline includes built in monitoring using Prometheus, Node Exporter, and G
 * Prometheus runs on the host node and scrapes metrics from all nodes.
 * Grafana provides a pre provisioned dashboard for cluster and pipeline monitoring.
 
-Access the monitoring tools via your local machines web browser:
+Access the monitoring tools via the web browser:
 
 * **Prometheus:**
   https://prometheus-ucabjsy.comp0235.condenser.arc.ucl.ac.uk
