@@ -6,8 +6,9 @@ INVENTORY="${CONTROL_DIR}/inventory.ini"
 KEY="${HOME}/.ssh/id_cluster"
 
 # Defaults
-LOOKBACK_MINUTES=60
+LOOKBACK_MINUTES=""
 USE_TAIL=1
+TAIL_LINES=150
 
 # Argument parsing
 while [[ $# -gt 0 ]]; do
@@ -21,7 +22,6 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     *)
-      echo "Unknown option: $1"
       echo "Usage: $0 [--since MINUTES] [--full]"
       exit 1
       ;;
@@ -29,8 +29,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "Collecting worker celery logs"
-echo "Lookback: ${LOOKBACK_MINUTES} minutes"
-echo "Tail: $([[ $USE_TAIL -eq 1 ]] && echo enabled || echo disabled)"
+if [[ -n "$LOOKBACK_MINUTES" ]]; then
+  echo "Mode    : time-filtered"
+  echo "Lookback: ${LOOKBACK_MINUTES} minutes"
+else
+  echo "Mode    : recent activity"
+fi
+echo "Tail    : $([[ $USE_TAIL -eq 1 ]] && echo enabled || echo disabled)"
 echo
 
 ansible workers \
@@ -49,16 +54,13 @@ if [[ ! -f "\$LOGFILE" ]]; then
   exit 0
 fi
 
-SINCE="\$(date -d '${LOOKBACK_MINUTES} minutes ago' '+%Y-%m-%d %H:%M:%S')"
-
-if [[ ${USE_TAIL} -eq 1 ]]; then
+if [[ -n "${LOOKBACK_MINUTES}" ]]; then
+  SINCE="\$(date -d '${LOOKBACK_MINUTES} minutes ago' '+%Y-%m-%d %H:%M:%S')"
   awk -v since="\$SINCE" '
     \$0 ~ /^[0-9]{4}-/ && \$0 >= since
-  ' "\$LOGFILE" | tail -n 200
+  ' "\$LOGFILE" $( [[ $USE_TAIL -eq 1 ]] && echo "| tail -n ${TAIL_LINES}" )
 else
-  awk -v since="\$SINCE" '
-    \$0 ~ /^[0-9]{4}-/ && \$0 >= since
-  ' "\$LOGFILE"
+  grep -E "task=|Sequence completed|aggregate_results" "\$LOGFILE" | tail -n ${TAIL_LINES}
 fi
 EOF
 )"

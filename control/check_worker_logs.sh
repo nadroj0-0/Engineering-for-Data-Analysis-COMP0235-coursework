@@ -54,7 +54,7 @@ SINCE="\$(date -d '${LOOKBACK_MINUTES} minutes ago' '+%Y-%m-%d %H:%M:%S')"
 if [[ ${USE_TAIL} -eq 1 ]]; then
   awk -v since="\$SINCE" '
     \$0 ~ /^[0-9]{4}-/ && \$0 >= since
-  ' "\$LOGFILE" | tail -n 200
+  ' "\$LOGFILE" | tail -n 150
 else
   awk -v since="\$SINCE" '
     \$0 ~ /^[0-9]{4}-/ && \$0 >= since
