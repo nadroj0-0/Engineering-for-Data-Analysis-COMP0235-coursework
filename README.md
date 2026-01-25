@@ -153,6 +153,7 @@ The entire system is provisioned using a single Ansible playbook (`full.yaml`), 
 
     * Redis for Celery task coordination
     * MinIO for final result storage
+      (Access at : https://ucabjsy-cons.comp0235.condenser.arc.ucl.ac.uk)
     * Prometheus and Grafana for monitoring
     * PostgreSQL for persistent protein sequence storage
   * Deploys host side pipeline scripts and configuration files
@@ -256,7 +257,7 @@ Access the monitoring tools via your local machines web browser:
   `http://<host_node_external_ip>:9090`
 
 * **Grafana:**
-  `http://<host_node_external_ip>:3000`
+  `https://grafana-ucabjsy.comp0235.condenser.arc.ucl.ac.uk`
 
 The Grafana dashboard displays cluster health, resource utilisation, and pipeline execution progress in real time.
 
