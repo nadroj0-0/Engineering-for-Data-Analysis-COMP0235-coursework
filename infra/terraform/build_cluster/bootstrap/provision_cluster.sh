@@ -4,7 +4,7 @@ set -e
 REPO_URL="https://gitlab2.ds4eng.condenser.arc.ucl.ac.uk/ucabjsy/coursework-comp0235-2025"
 BRANCH="main"
 
-INVENTORY_FILE="$HOME/bootstrap/inventory.ini"
+INVENTORY_FILE="$HOME/provision/inventory.ini"
 
 if [ ! -f "$INVENTORY_FILE" ]; then
   echo "ERROR: inventory.ini not found at $INVENTORY_FILE"
