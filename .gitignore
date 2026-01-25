@@ -48,4 +48,14 @@ Thumbs.db
 #Ignore ops.yml
 infra/ansible/roles/worker_configure_celery/tasks/ops.yml
 
+#Inventory files
 *.ini
+
+
+# Local-only legacy / development artifacts
+original_scripts_celery/
+src/
+
+# Keys
+keys/lecturer_key.pub
+
