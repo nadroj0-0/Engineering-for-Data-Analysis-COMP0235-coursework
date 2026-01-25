@@ -5,7 +5,6 @@
 - import_tasks: configure_pg_hba.yml
 - import_tasks: download_uniprot.yml
 - import_tasks: populate_database.yml
-- import_tasks: remove_uniprot_download.yml
 
 
 

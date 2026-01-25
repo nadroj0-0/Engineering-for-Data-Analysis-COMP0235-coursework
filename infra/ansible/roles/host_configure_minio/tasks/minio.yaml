@@ -180,22 +180,6 @@
     enabled: true
   become: true
   become_user: root
-#- name: Copy minio pass to almalinux directory
-#  ansible.builtin.copy:
-#    owner: almalinux
-#    group: almalinux
-#    mode: "0600"
-#    src: "./.miniopass"
-#    dest: "/home/almalinux/miniopass"
-#  become: true
-#  become_user: root
-#- name: Copy minio pass to shared
-#  ansible.builtin.copy:
-#    src: "./.miniopass"
-#    dest: "/shared/almalinux/miniopass"
-#    owner: almalinux
-#    group: almalinux
-#    mode: "0600"
 - name: Setup mc for local access
   ansible.builtin.template:
     src: templates/mc_config.json.j2
