@@ -1,14 +1,11 @@
 # Ansible Playbooks
 
 This directory contains the Ansible playbooks and roles used to provision all
-nodes in the cluster after virtual machines have been created.
-
-The main entry point is `full.yaml`, which orchestrates configuration across the
-host, storage node, and worker nodes.
+nodes in the cluster.
 
 ---
 
-## `full.yaml`
+## full.yaml
 
 Top-level orchestration playbook.
 
