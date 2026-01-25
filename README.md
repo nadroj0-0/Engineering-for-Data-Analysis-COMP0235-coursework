@@ -261,7 +261,7 @@ Access the monitoring tools via the web browser:
 
 To access the main pipeline dashboard:
 - Open the Grafana menu  
-- Navigate to **Dashboards → Pipeline → Pipeline Monitoring Overview**
+- Navigate to **Dashboards -> Pipeline -> Pipeline Monitoring Overview**
 
 
 The Grafana dashboard displays cluster health, resource utilisation, and pipeline execution progress in real time.
