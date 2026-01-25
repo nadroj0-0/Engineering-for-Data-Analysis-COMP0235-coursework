@@ -5,9 +5,7 @@ nodes in the cluster.
 
 ---
 
-## full.yaml
-
-Top-level orchestration playbook.
+### 'full.yaml'
 
 Runs the following playbooks in order:
 
@@ -18,14 +16,14 @@ Runs the following playbooks in order:
 - `host.yaml`
 - `workers.yaml`
 
-This ordering ensures that shared storage, logging, and datasets are available
+This ordering ensures that shared storage, datasets and logging are configured
 before application services are started.
 
 ---
 
-## `all.yaml`
+### `all.yaml`
 
-Applied to **all nodes** (host, storage, workers).
+Applied to all nodes.
 
 Configures:
 
@@ -40,7 +38,7 @@ metrics via the textfile collector.
 
 ---
 
-## `storage.yaml`
+### `storage.yaml`
 
 Applied to the **storage node** only.
 
@@ -60,7 +58,7 @@ flags to prevent re-downloading or rebuilding on re-runs.
 
 ---
 
-## `nfs_clients.yaml`
+### `nfs_clients.yaml`
 
 Applied to **host and worker nodes**.
 
@@ -75,7 +73,7 @@ nodes.
 
 ---
 
-## `logging.yaml`
+### `logging.yaml`
 
 Applied to **all nodes**.
 
@@ -93,7 +91,7 @@ This provides a consistent operational view of logs across the cluster.
 
 ---
 
-## `host.yaml`
+### `host.yaml`
 
 Applied to the **host node**.
 
@@ -111,7 +109,7 @@ loads dashboards from disk at startup.
 
 ---
 
-## `workers.yaml`
+### `workers.yaml`
 
 Applied to **worker nodes**.
 
@@ -126,7 +124,7 @@ pipeline log directory.
 
 ---
 
-## PostgreSQL Database
+### PostgreSQL Database
 
 The host provisions a local PostgreSQL database used to store protein sequences.
 
