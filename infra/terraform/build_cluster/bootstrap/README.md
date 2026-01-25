@@ -8,3 +8,4 @@ After `terraform apply`, from this directory:
 ```bash
 ./bootstrap.sh
 ```
+This script generates inventory files and installs SSH keys required for provisioning.

@@ -38,27 +38,32 @@
     remote_src: yes
 
 
-- name: Remove old src directory
+- name: Remove old pipeline_example directory
   ansible.builtin.file:
-    path: /home/almalinux/src/
+    path: /home/almalinux/pipeline_example/
     state: absent
 
-- name: Create src directory
+- name: Create pipeline_example directory
   ansible.builtin.file:
-    path: /home/almalinux/src
+    path: /home/almalinux/pipeline_example
     state: directory
     owner: almalinux
     group: almalinux
     mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
 
-- name: Copy src folder
+- name: Copy pipeline_example folder
   ansible.builtin.copy:
-    src: /tmp/V2coursework/src/
-    dest: /home/almalinux/src/
+    src: /tmp/V2coursework/pipeline_example/
+    dest: /home/almalinux/pipeline_example/
     owner: almalinux
     group: almalinux
     mode: "0755"          #7-owner:rwe, 5-group:re, 5-others:re
     remote_src: yes
+
+- name: Remove old control directory
+  ansible.builtin.file:
+    path: /home/almalinux/control/
+    state: absent
 
 - name: Create control directory
   ansible.builtin.file:

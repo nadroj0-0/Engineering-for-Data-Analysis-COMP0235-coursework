@@ -85,7 +85,7 @@ USER_SSH="-i $USER_KEY -o IdentitiesOnly=yes"
 ssh $USER_SSH ${USER}@${HOST_IP} '
   set -e
   if [ ! -f ~/.ssh/id_cluster ]; then
-    echo "Creating cluster SSH key at $SSH_KEY"
+    echo "Creating cluster SSH key at ~/.ssh/id_cluster"
     mkdir -p ~/.ssh 
     chmod 700 ~/.ssh
     ssh-keygen -t ed25519 -f ~/.ssh/id_cluster -N ""
@@ -101,16 +101,16 @@ ansible-playbook -i "$INVENTORY" bootstrap_ssh.yaml
 
 
 
-echo "Creating bootstrap directory on host"
-ssh $SSH_OPTS ${USER}@${HOST_IP} "mkdir -p ~/bootstrap"
+echo "Creating provision directory on host"
+ssh $SSH_OPTS ${USER}@${HOST_IP} "mkdir -p ~/provision"
 
 echo "Copying inventory.ini"
-scp $SSH_OPTS "$INVENTORY" ${USER}@${HOST_IP}:~/bootstrap/inventory.ini
+scp $SSH_OPTS "$INVENTORY" ${USER}@${HOST_IP}:~/provision/inventory.ini
 
 echo "Copying provision_cluster.sh"
-scp $SSH_OPTS "$PROVISION" ${USER}@${HOST_IP}:~/bootstrap/provision_cluster.sh
-ssh $SSH_OPTS ${USER}@${HOST_IP} "chmod +x ~/bootstrap/provision_cluster.sh"
+scp $SSH_OPTS "$PROVISION" ${USER}@${HOST_IP}:~/provision/provision_cluster.sh
+ssh $SSH_OPTS ${USER}@${HOST_IP} "chmod +x ~/provision/provision_cluster.sh"
 
 echo "Bootstrap complete"
 echo "Log into the host VM with:"
-echo "ssh -i ~/.ssh/user_key ${USER}@${HOST_IP} and follow: ~/bootstrap/README.md"
+echo "ssh -i ~/.ssh/user_key ${USER}@${HOST_IP} and follow: ~/provision/README.md"

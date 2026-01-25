@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ---- Configuration ----
+
 PYTHON_SCRIPT="/shared/almalinux/scripts/celery/lecturer_example_validation.py"
-FASTA_FILE="/home/almalinux/src/pipeline_example/test.fa"
+FASTA_FILE="/home/almalinux/pipeline_example/test.fa"
 RUN_NAME="lecturer_example"
 
-# ---- Sanity checks ----
+
 if [[ ! -f "$PYTHON_SCRIPT" ]]; then
   echo "ERROR: Validation Python script not found:"
   echo "  $PYTHON_SCRIPT"
@@ -30,5 +30,5 @@ echo "and allow comparison with lecturer reference."
 echo "=============================================="
 echo
 
-# ---- Execute ----
+
 exec python3 "$PYTHON_SCRIPT" "$FASTA_FILE" "$RUN_NAME"

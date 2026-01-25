@@ -2,7 +2,7 @@ from Bio import SeqIO
 from celery import chord
 from tasks import run_sequence_task, aggregate_results_task
 
-FASTA = "/home/almalinux/src/pipeline_example/test.fa"
+FASTA = "/home/almalinux/pipeline_example/test.fa"
 
 run_id = "lecturer_example"
 
