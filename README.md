@@ -1,5 +1,3 @@
----
-
 # COMP0235 Coursework – Distributed Protein Analysis Pipeline
 
 ## Introduction
@@ -8,7 +6,6 @@ This project implements a distributed protein analysis pipeline deployed across 
 
 The pipeline is provisioned on a cluster consisting of one host node and 4 worker nodes. All cluster configuration, deployment, execution, and monitoring are automated using Terraform, Ansible, and host side control scripts.
 
----
 
 ## 1. SSH Key Generation and Bootstrap
 
