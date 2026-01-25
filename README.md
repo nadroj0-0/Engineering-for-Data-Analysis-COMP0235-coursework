@@ -254,10 +254,10 @@ The pipeline includes built in monitoring using Prometheus, Node Exporter, and G
 Access the monitoring tools via your local machines web browser:
 
 * **Prometheus:**
-  `http://<host_node_external_ip>:9090`
+  https://prometheus-ucabjsy.comp0235.condenser.arc.ucl.ac.uk
 
 * **Grafana:**
-  `https://grafana-ucabjsy.comp0235.condenser.arc.ucl.ac.uk`
+  https://grafana-ucabjsy.comp0235.condenser.arc.ucl.ac.uk
 
 The Grafana dashboard displays cluster health, resource utilisation, and pipeline execution progress in real time.
 
