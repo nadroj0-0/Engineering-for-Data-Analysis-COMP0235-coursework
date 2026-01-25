@@ -84,7 +84,7 @@
 
 - name: Copy inventory.ini file to control folder
   ansible.builtin.copy:
-    src: /home/almalinux/bootstrap/inventory.ini
+    src: /home/almalinux/provision/inventory.ini
     dest: /home/almalinux/control/inventory.ini
     owner: almalinux
     group: almalinux
