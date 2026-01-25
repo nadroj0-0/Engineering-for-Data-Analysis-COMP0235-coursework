@@ -119,123 +119,57 @@ Specifically, it:
 
 ---
 
-### 2.3 Ansible Provisioning Details (`full.yaml`)
+### 2.3 Ansible Provisioning Summary (`full.yaml`)
 
-The entire system is provisioned using a single Ansible playbook (`full.yaml`), which imports a sequence of sub playbooks and roles. Each stage configures a distinct layer of the system.
+The entire system is provisioned using a single Ansible playbook (`full.yaml`), which imports and executes a sequence of playbooks and roles. Each playbook configures a specific layer of the system.
 
-#### Global Node Setup (All Nodes)
+* **`all.yaml`**
 
-Applied uniformly to host, workers, and storage nodes:
+  * Applies baseline configuration to all nodes
+  * Installs common system packages and Python dependencies
+  * Deploys Node Exporter on all nodes for system metrics collection
 
-* Base system configuration (localisation, timezone, package updates)
-* Installation of development tools, compilers, and utilities
-* Python environments (including Python 3.12)
-* OpenMPI installation and configuration
-* Node Exporter deployment with a systemd-managed service
-* Creation of a custom metrics directory for Prometheus textfile collectors
+* **`storage.yaml`**
 
-This establishes a consistent execution environment across the cluster before role-specific configuration begins.
+  * Configures the designated storage node
+  * Sets up NFS export directories under `/shared`
+  * Prepares and populates shared storage with datasets, tools, pipeline scripts, and outputs
 
----
+* **`nfs_clients.yaml`**
 
-#### Shared Storage Layer (NFS)
+  * Mounts the shared NFS filesystem on the host and worker nodes
+  * Ensures consistent paths for code, data, and run artefacts across all machines
 
-Configured before any pipeline services:
+* **`logging.yaml`**
 
-* A dedicated storage node exports `/shared` via NFS
-* Host and worker nodes mount the export persistently
-* User home directories are symlinked into shared storage
-* Shared log directories are created and managed via logrotate
+  * Creates standardised log directories
+  * Configures log rotation and shared logging paths
+  * Prepares the system for pipeline and worker level logging
 
-The shared filesystem is used for pipeline scripts, datasets, intermediate `.outs` files, and run artefacts, ensuring persistence across worker failures.
+* **`host.yaml`**
 
----
+  * Installs host specific Python dependencies
+  * Configures all host side services:
 
-#### Host Node Services
+    * Redis for Celery task coordination
+    * MinIO for final result storage
+    * Prometheus and Grafana for monitoring
+    * PostgreSQL for persistent protein sequence storage
+  * Deploys host side pipeline scripts and configuration files
 
-The host node provisions all central coordination components:
+* **`workers.yaml`**
 
-* **Redis**
+  * Installs worker specific Python dependencies
+  * Configures Celery workers
+  * Deploys and enables systemd managed worker services
 
-  * Installed and configured to accept network connections
-  * Used as both the Celery broker and result backend
+Once `full.yaml` completes, shared storage is mounted, core services are running, workers are active, and the cluster is ready to execute pipeline runs.
 
-* **MinIO**
+A detailed breakdown of individual roles, tasks, and configuration settings is provided in:
 
-  * TLS certificates generated on first run
-  * Secure root credentials generated and persisted
-  * Configured as an S3-compatible object store
-  * Client configuration deployed
-  * Credentials copied to shared storage for worker access
-
-MinIO is used only for final result persistence and is not required for task execution.
-
----
-
-#### PostgreSQL Sequence Database
-
-On the host node:
-
-* PostgreSQL initialised and enabled
-* `pipeline_db` database created
-* `proteins` table defined for UniProt sequences
-* Controlled database user created with read-only access
-* UniProt mouse proteome downloaded and populated via a dedicated script
-
-This allows pipeline tasks to retrieve sequences efficiently without repeated FASTA parsing.
-
----
-
-#### Bioinformatics Toolchain (Shared Storage)
-
-Installed centrally on the storage node:
-
-* UniProt reference proteome
-* PDB70 database for HHsearch
-* HHsuite compiled from source
-* S4Pred installed with pretrained weights
-
-Installation flags ensure idempotency and prevent redundant recompilation.
-
----
-
-#### Pipeline Code Deployment
-
-The pipeline repository is cloned once and distributed as follows:
-
-* Host node: coordination logic and control scripts
-* Shared storage: execution scripts, datasets, and run directories
-
-Workers execute tasks directly from shared storage.
-
----
-
-#### Distributed Task Execution (Workers)
-
-On each worker node:
-
-* Python dependencies installed (`celery[redis]`, `biopython`, `numpy`, `scipy`, `torch`, `minio`)
-* A dynamic `celeryconfig.py` generated using the current host IP
-* A systemd-managed Celery worker service deployed and enabled
-* Tasks executed independently with controlled concurrency and structured logging
-
----
-
-#### Monitoring and Logging
-
-Final provisioning stage:
-
-* Prometheus configured to scrape itself and Node Exporter on all nodes
-* Recording rules compute aggregate CPU, memory, and disk metrics
-* Grafana installed and provisioned declaratively with:
-
-  * Prometheus datasource
-  * Predefined dashboards (including the pipeline dashboard)
-* Log directories standardised and rotated across host, workers, and storage
-
----
-
-Once `full.yaml` completes, all services are active, monitoring is live, and the cluster is fully provisioned and ready to execute pipeline runs.
+```
+infra/ansible/README.md
+```
 
 ---
 
