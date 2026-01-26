@@ -61,14 +61,14 @@ Examples:
   ./check_storage_logs.sh --since 480 --full
 
 
-### sanity_check_progress.sh
+### `sanity_check_progress.sh`
 Sanity check to compare Prometheus task completion count with MinIO object count for a run.
 
 Usage:
-  ./sanity_check_progress.sh <run_name>
+`./sanity_check_progress.sh <run_name>
 
 
-### run_fasta_pipeline.sh
+### `run_fasta_pipeline.sh`
 Runs the pipeline on sequences defined in a FASTA file by extracting sequence IDs and executing the standard database backed pipeline.
 
 Usage:
