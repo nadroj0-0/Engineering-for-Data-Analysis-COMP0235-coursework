@@ -203,6 +203,10 @@ Key behaviour:
 * Intermediate outputs are written to shared storage.
 * Final aggregated results are also persisted to MinIO.
 
+For implementation details refer to 
+```
+scripts/celery/README.md
+```
 ---
 
 ### 3.2 Results Collection and Control Scripts
