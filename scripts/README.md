@@ -136,7 +136,7 @@ CREATE TABLE proteins (
 ````
 
 * `id` is the UniProt identifier
-* `payload` stores the full FASTA entry
+* `payload` stores the full sequence
 
 The database is populated automatically via Ansible using a Python script.
 
