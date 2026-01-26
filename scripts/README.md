@@ -1,11 +1,9 @@
----
 ## Pipeline Architecture
 
 The document describes the workflow flow, task ordering and filesystem
 layout of the distributed protien analysis pipeline, and links each stage
 of the workflow to the scripts in this directory that implement it.
 
----
 ## Celery Task Pipeline
 
 Pipeline execution logic is implemented in:
