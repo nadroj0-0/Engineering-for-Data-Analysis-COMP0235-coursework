@@ -162,7 +162,19 @@ These scripts call `run_pipeline_host.py` and do not modify
 core pipeline logic.
 
 ---
+## Results Retrieval
 
+After a pipeline run has completed, aggregated results can be retrieved
+from object storage to the host using:
+```
+pull_results.py <run_name>
+```
+
+This downloads the final CSV outputs for the specified run onto the host into 
+```
+~/results/<run_name>
+```
+---
 ## Monitoring and Logging
 
 ### Metrics
