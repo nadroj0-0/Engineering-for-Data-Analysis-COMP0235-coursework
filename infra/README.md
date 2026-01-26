@@ -143,6 +143,7 @@ Celery Details
 
   - Broker: Redis on host (redis://host:6379/0)
   - Backend: Redis
+  - Working Directory: `/shared/almalinux/scripts/celery`
   - Concurrency: 1 per worker
   - Logging: `/var/log/protien_analysis_pipeline/celery_<hostname>.log`
   - Restart policy: always
