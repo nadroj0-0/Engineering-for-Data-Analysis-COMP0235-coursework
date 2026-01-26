@@ -60,6 +60,6 @@ Sanity check to compare Prometheus task completion count with MinIO object count
 Runs the pipeline on sequences defined in a FASTA file by extracting sequence IDs and executing the standard database backed pipeline.
 
 
-##Subdirectories
+## Subdirectories
 - `cleaning/` – cleanup and reset scripts
 - `testing/` – validation and test run scripts
