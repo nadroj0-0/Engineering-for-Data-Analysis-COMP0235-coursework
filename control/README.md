@@ -68,6 +68,13 @@ Usage:
   ./sanity_check_progress.sh <run_name>
 
 
+### run_fasta_pipeline.sh
+Runs the pipeline on sequences defined in a FASTA file by extracting sequence IDs and executing the standard database backed pipeline.
+
+Usage:
+  ./run_fasta_pipeline.sh <fasta_file> [run_name]
+
+
 ##Subdirectories:
 - `cleaning/` – cleanup and reset scripts
 - `testing/` – validation and test run scripts
