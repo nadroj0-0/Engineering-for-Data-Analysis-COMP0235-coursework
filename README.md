@@ -203,7 +203,7 @@ Key behaviour:
 * Intermediate outputs are written to shared storage.
 * Final aggregated results are also persisted to MinIO.
 
-For implementation details refer to 
+For more indepth implementation details refer to 
 ```
 scripts/celery/README.md
 ```
@@ -243,7 +243,7 @@ Additional control scripts are available for inspecting logs, sanity checking pr
 ~/control/README.md
 ```
 
-Refer to that file for detailed usage instructions.
+Refer to that file for detailed usage instructions, including how to test the pipeline using a FASTA file.
 
 ---
 
