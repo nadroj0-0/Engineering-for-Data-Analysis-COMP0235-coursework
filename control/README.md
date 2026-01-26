@@ -24,55 +24,40 @@ Retrieves final aggregated CSV outputs for a given run from MinIO to the host.
 - Stores results locally under:
   ~/results/<run_name>
 
-### `check_worker_logs.sh`
+### `check_worker_logs.sh [--since MINUTES] [--full]`
 Uses Ansible to fetch and display recent (default : last 60 mins, tail 150) worker logs across all nodes.
 
-Usage:
-  ./check_worker_logs.sh [--since MINUTES] [--full]
+Usage examples:
+  - ./check_worker_logs.sh
+  - ./check_worker_logs.sh --since 120
+  - ./check_worker_logs.sh --full
+  - ./check_worker_logs.sh --since 480 --full
 
-Examples:
-  ./check_worker_logs.sh
-  ./check_worker_logs.sh --since 120
-  ./check_worker_logs.sh --full
-  ./check_worker_logs.sh --since 480 --full
-
-### `check_celery_logs.sh`
+### `check_celery_logs.sh [--since MINUTES] [--full]`
 Uses Ansible to fetch and display recent (default : tail 150) Celery worker logs across all nodes.
 
-Usage:
-  ./check_celery_logs.sh [--since MINUTES] [--full]
+Usage examples:
+  - ./check_celery_logs.sh
+  - ./check_celery_logs.sh --since 120
+  - ./check_celery_logs.sh --full
+  - ./check_celery_logs.sh --since 480 --full
 
-Examples:
-  ./check_celery_logs.sh
-  ./check_celery_logs.sh --since 120
-  ./check_celery_logs.sh --full
-  ./check_celery_logs.sh --since 480 --full
-
-### `check_storage_logs.sh`
+### `check_storage_logs.sh [--since MINUTES] [--full]`
 Displays recent (default : last 60 mins, tail 150) storage logs (NFS / MinIO write activity).
 
-Usage:
-  ./check_storage_logs.sh [--since MINUTES] [--full]
-
-Examples:
-  ./check_storage_logs.sh
-  ./check_storage_logs.sh --since 120
-  ./check_storage_logs.sh --full
-  ./check_storage_logs.sh --since 480 --full
+Usage examples:
+  - ./check_storage_logs.sh
+  - ./check_storage_logs.sh --since 120
+  - ./check_storage_logs.sh --full
+  - ./check_storage_logs.sh --since 480 --full
 
 
-### `sanity_check_progress.sh`
+### `sanity_check_progress.sh <run_name>`
 Sanity check to compare Prometheus task completion count with MinIO object count for a run.
 
-Usage:
-`./sanity_check_progress.sh <run_name>
 
-
-### `run_fasta_pipeline.sh`
+### `run_fasta_pipeline.sh <fasta_file> [run_name]`
 Runs the pipeline on sequences defined in a FASTA file by extracting sequence IDs and executing the standard database backed pipeline.
-
-Usage:
-  ./run_fasta_pipeline.sh <fasta_file> [run_name]
 
 
 ##Subdirectories:
