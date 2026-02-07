@@ -1,4 +1,4 @@
-# COMP0235 Coursework – Distributed Protein Analysis Pipeline
+# Engineering for Data Analysis COMP0235 Coursework – Distributed Protein Analysis Pipeline
 
 ## Introduction
 
